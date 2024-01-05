@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/registerFragment">
+    <action android:id="@+id/action_global_trackingFragment"
+        app:destination="@id/trackingFragment"
+        app:launchSingleTop="true"
+        />
+    <fragment
+        android:id="@+id/joggingsFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.JoggingFragment"
+        android:label="JoggingFragments" >
+        <action
+            android:id="@+id/action_joggingFragments_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action android:id="@+id/action_joggingFragments_to_statisticsFragment"
+            app:destination="@id/statisticsFragment"/>
+        <action android:id="@+id/action_joggingFragments_to_trackingFragment"
+            app:destination="@id/trackingFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/setUpFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.SetupFragment"
+        android:label="SetUpFragment" >
+        <action
+            android:id="@+id/action_setUpFragment_to_joggingFragments"
+            app:destination="@id/joggingFragments" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.SettingsFragment"
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment_to_joggingFragments"
+            app:destination="@id/joggingFragments" />
+    </fragment>
+    <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.StatisticsFragment"
+        android:label="StatisticsFragment" />
+    <fragment
+        android:id="@+id/trackingFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.TrackingFragment"
+        android:label="TrackingFragment">
+        <action android:id="@+id/action_tracking_fragment_to_jogging_fragment"
+            app:destination="@id/joggingsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.RegisterFragment"
+        android:label="RegisterFragment">
+        <action android:id="@+id/navigation_to_login"
+            app:destination="@id/loginFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.LoginFragment"
+        android:label="LoginFragment">
+        <action
+            android:id="@+id/navigate_to_jogging_fragment"
+            app:destination="@id/joggingsFragment"
+            />
+
+        <action
+            android:id="@+id/navigate_to_register_fragment"
+            app:destination="@id/registerFragment"
+            />
+    </fragment>
+</navigation>
