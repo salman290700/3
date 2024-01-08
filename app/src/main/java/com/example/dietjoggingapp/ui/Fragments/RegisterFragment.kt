@@ -88,6 +88,7 @@ class RegisterFragment : Fragment() {
         binding.btnRegister.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val pass = binding.etPassword.text.toString()
+
             if(validation()) {
                 viewModel.registerUser(email = email,
                 password = pass,
@@ -121,13 +122,44 @@ class RegisterFragment : Fragment() {
     fun getUserObj(): User {
         val name = binding.etName.text.toString()
         val email = binding.etEmail.text.toString()
-
+        val weight = binding.etWeight.text.toString().toFloat()
+        val height = binding.etHeight.text.toString().toFloat()
+        val age = binding.etAge.text.toString().toFloat()
         return User(
             userId = "",
             fullName = name,
             email = email,
-            date = Date()
+            date = Date(),
+            weight = weight,
+            height = height,
+            age = age,
+            bmr = dailyCalorie()
         )
+    }
+
+    private fun dailyCalorie(): Float {
+        val weight = binding.etWeight.text.toString().toFloat()
+        val height = binding.etHeight.text.toString().toFloat()
+        val age = binding.etAge.text.toString().toFloat()
+        var gender: String = ""
+
+        binding.rgGender.setOnCheckedChangeListener { group, checkedId ->
+            if(checkedId == R.id.rbMale) {
+                gender = "Male"
+            } else {
+                gender = "female"
+            }
+        }
+
+        var bmr: Float = 0.0f
+
+        if(gender == "Male") {
+            bmr = ((66.5f + (13.7f * weight) + (5f * height) - (6.8f * age)).toFloat())
+        } else {
+            bmr = (65.5 + (9.6 * weight) + (1.8 * height) - (4.7 * age)).toFloat()
+        }
+
+        return bmr
     }
 
     fun validation(): Boolean {
