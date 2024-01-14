@@ -151,12 +151,12 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        var bmr: Float = 0.0f
+        var bmr = 0.0f
 
         if(gender == "Male") {
-            bmr = ((66.5f + (13.7f * weight) + (5f * height) - (6.8f * age)).toFloat())
+            bmr = (10.0f * weight + 6.25f * height - 5.0f * age + 5.0f).toFloat()
         } else {
-            bmr = (65.5 + (9.6 * weight) + (1.8 * height) - (4.7 * age)).toFloat()
+            bmr = (10.0f * weight + 6.25f * height - 5.0f * age - 161.0f).toFloat()
         }
 
         return bmr

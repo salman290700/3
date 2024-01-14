@@ -13,4 +13,9 @@
         android:id="@+id/setiingsFragment"
         android:title="Settings"
         android:icon="@drawable/ic_baseline_settings_24"/>
+    <item
+        android:id="@+id/foodFragment"
+        android:title="Calorie"
+        android:icon="@drawable/ic_baseline_emoji_food_beverage_24"
+        />
 </menu>
