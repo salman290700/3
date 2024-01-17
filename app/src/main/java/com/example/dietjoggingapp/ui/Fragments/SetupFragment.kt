@@ -78,7 +78,6 @@ class SetupFragment: Fragment(R.layout.fragment_setup) {
             .putBoolean(KEY_FIRST_TIME_TOGGLE, false)
             .apply()
         val toolbarText = "Let's Go, $name"
-       requireActivity().findViewById<TextView>(R.id.tvToolbarTitle).text = toolbarText
         return true
     }
 }

@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.database.Jogging
+import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.databinding.FragmentTrackingBinding
 import com.example.dietjoggingapp.other.Constants
 import com.example.dietjoggingapp.other.Constants.ACTION_PAUSE_SERVICE
@@ -162,29 +163,10 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             )
         )
     }
-    
-    private fun addJoggingToDB() {
-        map?.snapshot { bmp ->
-            var distanceInMeter = 0
-            for(polyline in pathPoints) {
-                distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline).toInt()
-            }
-            var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
-            val dateTimeStamp = Calendar.getInstance().timeInMillis
-            val caloriesBurned = ((distanceInMeter / 1000f) * weight).toInt()
-            val jogging = Jogging("", bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
-
-            Snackbar.make(
-                requireActivity().findViewById(R.id.joggingFragments),
-                "Run Saved Successfully ${jogging.caloriesBurned}",
-                Snackbar.LENGTH_LONG
-            ).show()
-            stopRun()
-
-        }
-    }
 
     private fun addBitmap() {
+        val bundle = arguments
+        val message = bundle!!.getString("EXTRA_USER_SESSION")
         map?.snapshot { bmp ->
             var distanceInMeter = 0
             for(polyline in pathPoints) {
@@ -193,7 +175,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
             val dateTimeStamp = Calendar.getInstance().timeInMillis
             val caloriesBurned = ((distanceInMeter / 1000f) * weight).toInt()
-            val jogging = Jogging("", bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
+            val jogging = Jogging("", message.toString(),bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
 
             Snackbar.make(
                 requireActivity().findViewById(R.id.joggingFragments),
@@ -247,6 +229,8 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     }
 
     private fun getJogging(): Jogging{
+        val bundle = arguments
+        val message = bundle!!.getString("EXTRA_USER_SESSION")
         map?.snapshot { bmp ->
             var distanceInMeter = 0
             for(polyline in pathPoints) {
@@ -255,7 +239,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
             val dateTimeStamp = Calendar.getInstance().timeInMillis
             val caloriesBurned = ((distanceInMeter / 1000f) * weight).toInt()
-            val jogging = Jogging("", bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
+            val jogging = Jogging("", message.toString(),bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
             this.distanceInMeter = distanceInMeter
             this.jogging = jogging
             this.dateTimeStamp = dateTimeStamp
@@ -272,6 +256,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
         }
         return Jogging(
             id = jogging?.id ?: "",
+            userId = message.toString(),
             img = bitmap,
             timestamp =  dateTimeStamp,
             avgSpeedInKmh = avgSpeed,

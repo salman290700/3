@@ -11,6 +11,7 @@ import java.util.Date
 @Parcelize
 data class Jogging (
     var id: String = "",
+    var userId: String = "",
     var img: Bitmap? = null,
     var timestamp: Long = 0L,
     var avgSpeedInKmh: Float = 0f,

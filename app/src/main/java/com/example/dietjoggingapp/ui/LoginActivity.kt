@@ -10,28 +10,32 @@ import android.widget.Toast
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
     private lateinit var binding: ActivityLoginBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnLogin.setOnClickListener {
+        binding.btnLogin.setOnClickListener{
             btnLogin()
         }
     }
 
     private fun btnLogin() {
-        val email = binding.etEmail.text.toString()
-        val password = binding.etPassword.text.toString()
+        var email = binding.etEmail.getText().toString()
+        var password = binding.etPassword.getText().toString()
 
         signInEmail(email, password)
     }
 
     private fun signInEmail(email: String, password: String){
+        val auth: FirebaseAuth = FirebaseAuth.getInstance()
         if(email.isNotEmpty() && password.isNotEmpty()){
             auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
                 if (it.isSuccessful){
