@@ -3,6 +3,7 @@ package com.example.dietjoggingapp.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toolbar
 import androidx.appcompat.app.ActionBar
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
 //        Log.d(TAG, "onCreate: joggingDao${joggingDAO.hashCode()}")
     }
     fun loginFirst () {
+        Log.d("TAG", "loginFirst: " + sessionId.toString())
         if (firebaseUser == null) {
             val intent: Intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
