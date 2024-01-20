@@ -51,16 +51,19 @@ class JoggingRepoImp(
     override fun addJogging(jogging: Jogging, result: (UiState<Pair<Jogging, String>>) -> Unit) {
         val document = database.collection(Constants.FirestoreTable.JOGGING).document()
         jogging.id = document.id
+        Log.d("TAG", "addJogging: " + jogging.id)
         document.set(jogging)
             .addOnSuccessListener {
                 result.invoke(
                     UiState.Success(Pair(jogging, "Project has been Created..."))
                 )
+                Log.d("TAG", "addJogging: " + it.toString())
             }
             .addOnFailureListener{
                 result.invoke(
                     UiState.failure(it.localizedMessage.toString())
                 )
+                Log.d("TAG", "addJogging: " + it.localizedMessage)
             }
     }
 

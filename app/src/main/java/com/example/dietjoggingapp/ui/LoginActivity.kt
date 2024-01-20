@@ -25,6 +25,11 @@ class LoginActivity : AppCompatActivity() {
         binding.btnLogin.setOnClickListener{
             btnLogin()
         }
+
+        binding.tvRegister.setOnClickListener {
+            val intent: Intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun btnLogin() {

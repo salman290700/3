@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import javax.inject.Inject
@@ -164,8 +165,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     }
 
     private fun addBitmap() {
-        val bundle = arguments
-        val message = bundle!!.getString("EXTRA_USER_SESSION")
+        val auth: String = FirebaseAuth.getInstance().currentUser?.uid.toString()
         map?.snapshot { bmp ->
             var distanceInMeter = 0
             for(polyline in pathPoints) {
@@ -174,20 +174,19 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
             val dateTimeStamp = Calendar.getInstance().timeInMillis
             val caloriesBurned = ((distanceInMeter / 1000f) * weight).toInt()
-            val jogging = Jogging("", message.toString(),bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
+            val jogging = Jogging("", auth, bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
 
             Snackbar.make(
                 requireActivity().findViewById(R.id.joggingFragments),
                 "Run Saved Successfully ${jogging.caloriesBurned}",
                 Snackbar.LENGTH_LONG
             ).show()
+            Log.d("TAG", "addBitmap: " + auth)
 
     }
 }
 
     private fun createJogging(){
-        addBitmap()
-
 //        if (validation()){
 //            if(jogging == null){
 //                viewModel.addJogging(getJogging())
@@ -195,6 +194,8 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 //
 //            }
 //        }
+
+
         viewModel.addJogging.observe(viewLifecycleOwner){state ->
             when(state){
                 is UiState.Loading -> {
@@ -207,9 +208,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
                 is UiState.Success -> {
                     binding.progressBar.hide()
                     toast(state.data.second)
-                    if (jogging == null){
-                        viewModel.addJogging(getJogging())
-                    }
+                    this.jogging = getJogging()
                     jogging = state.data.first
                     Log.d("TAG", "createProject: " + jogging!!.id)
                     Log.d("TAG", "createProjectname: " + jogging!!.caloriesBurned)
@@ -229,8 +228,8 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 
 
     private fun getJogging(): Jogging{
-        val bundle = arguments
-        val message = bundle!!.getString("EXTRA_USER_SESSION")
+        val auth = FirebaseAuth.getInstance().currentUser?.uid.toString()
+        Log.d("TAG", "getJogging: " + auth)
         map?.snapshot { bmp ->
             var distanceInMeter = 0
             for(polyline in pathPoints) {
@@ -246,25 +245,23 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             this.caloriesBurned = caloriesBurned
             this.avgSpeed = avgSpeed
             this.bitmap = bmp
-            val jogging = Jogging("", message.toString(),bitmap, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
             Snackbar.make(
                 requireActivity().findViewById(R.id.joggingFragments),
-                "Run Saved Successfully ${jogging.caloriesBurned}",
+                "Run Saved Successfully ${jogging?.caloriesBurned}",
                 Snackbar.LENGTH_LONG
             ).show()
-            Log.d("TAG", "getJogging: " + bmp.toString())
-            stopRun()
+            Log.d("TAG", "getJogging: ")
         }
         return Jogging(
-            id = jogging?.id ?: "",
-            userId = message.toString(),
+            id = "",
+            userId = auth,
             img = bitmap,
             timestamp =  dateTimeStamp,
             avgSpeedInKmh = avgSpeed,
             distanceInMeters = distanceInMeter,
             timeInMillis = currentTimeInMilliseconds,
             caloriesBurned = caloriesBurned
-        ).apply { authViewModel.getSession { this.id = it?.userId ?: "" } }
+        )
     }
 
     private fun subscribeToObservers() {
@@ -342,8 +339,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
                 .add(preLastLatLng)
                 .add(lastLatLng)
             map?.addPolyline(polylineOptions)
-        }else {
-
         }
     }
 
