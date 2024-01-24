@@ -28,10 +28,9 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 //        Setup register button
-        val email = binding.etEmail.text.toString()
-        val password = binding.etEmail.text.toString()
-
         binding.btnRegister.setOnClickListener {
+            val email = binding.etEmail.text.toString()
+            val password = binding.etEmail.text.toString()
             registerUser(email, password, setUser(), )
         }
 
@@ -43,6 +42,7 @@ class RegisterActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener{
                 Log.d("TAG", "registerUser: " + auth.currentUser?.uid.toString())
+                database = FirebaseFirestore.getInstance()
                 val document = database.collection(Constants.FirestoreTable.USERS).document()
                 user.userId = document.id
                 document.set(user)
@@ -51,7 +51,6 @@ class RegisterActivity : AppCompatActivity() {
                         val intent: Intent = Intent(this, LoginActivity::class.java)
                         startActivity(intent)
                     }
-
                     .addOnFailureListener{
                         Log.d("TAG", "addUser: " + it.localizedMessage)
                     }
@@ -76,6 +75,8 @@ class RegisterActivity : AppCompatActivity() {
             userId = "",
             fullName = name,
             email = email,
+            dailyCalorie = dailyCalorie(),
+            bmr = dailyCalorie(),
             weight = weight,
             height = height,
             age = age,

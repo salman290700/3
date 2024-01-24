@@ -27,7 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     val firebaseUser = FirebaseAuth.getInstance().currentUser
-    val sessionId: String = firebaseUser?.uid.toString()
+    val sessionId: String = firebaseUser?.uid.toString().trim()
 //    @Inject
 //    lateinit var joggingDAO: JoggingDAO
     override fun onCreate(savedInstanceState: Bundle?) {

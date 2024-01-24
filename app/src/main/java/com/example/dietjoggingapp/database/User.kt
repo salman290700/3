@@ -12,7 +12,7 @@ data class User(
     val email: String = "",
     @ServerTimestamp
     val date: Date = Date(),
-    val dailyCalorie: Double = 0.0,
+    val dailyCalorie: Float = 0f,
     val weight: Float = 70.0f,
     val height: Float = 172.0f,
     val age: Float = 0.0f,

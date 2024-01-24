@@ -32,11 +32,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun btnLogin() {
-        var email = binding.etEmail.getText().toString()
-        var password = binding.etPassword.getText().toString()
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
 
-        signInEmail(email, password)
+
+        return super.onCreateView(name, context, attrs)
     }
 
     private fun signInEmail(email: String, password: String){
@@ -44,7 +43,6 @@ class LoginActivity : AppCompatActivity() {
         if(email.isNotEmpty() && password.isNotEmpty()){
             auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
                 if (it.isSuccessful){
-
                     Toast.makeText(this, "Anda berhasil Login", Toast.LENGTH_LONG)
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
@@ -55,5 +53,11 @@ class LoginActivity : AppCompatActivity() {
         }else{
             Toast.makeText(this, "Tolong lengkapi email & password anda", Toast.LENGTH_LONG)
         }
+    }
+
+    private fun btnLogin() {
+        var email = binding.etEmail.text.toString()
+        var password = binding.etPassword.text.toString()
+        signInEmail(email, password)
     }
 }

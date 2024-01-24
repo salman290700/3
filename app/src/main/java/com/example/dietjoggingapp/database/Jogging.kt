@@ -15,8 +15,8 @@ data class Jogging (
     var img: Bitmap? = null,
     var timestamp: Long = 0L,
     var avgSpeedInKmh: Float = 0f,
-    var distanceInMeters: Int = 0,
+    var distanceInMeters: Float = 0f,
     var timeInMillis: Long = 0L,
-    var caloriesBurned: Int = 0,
+    var caloriesBurned: Float = 0f,
 //    var date: Date = Date()
 ) : Parcelable

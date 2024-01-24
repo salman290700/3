@@ -16,7 +16,8 @@ import javax.inject.Inject
 class AddJoggingViewModel (private val joggingRepo: JoggingRepo): ViewModel() {
     private val _addJogging = MutableLiveData<UiState<Pair<Jogging, String>>>()
     val addJogging: LiveData<UiState<Pair<Jogging, String>>>
-        get() = _addJogging
+    get() = _addJogging
+
     fun addJogging(jogging: Jogging){
         _addJogging.value = UiState.Loading
         joggingRepo.addJogging(jogging){
