@@ -22,28 +22,4 @@ import javax.inject.Singleton
 @Module
 object AppModule {
 //    IsFirstLaunch
-    @Singleton
-    @Provides
-    fun provideSharedPref(@ApplicationContext app: Context) =
-        app.getSharedPreferences(SHARED_PREFEREMCES_NAME, MODE_PRIVATE)
-
-    @Singleton
-    @Provides
-    fun provideName(sharedPref: SharedPreferences) = sharedPref.getString(KEY_NAME, "") ?: ""
-
-    @Singleton
-    @Provides
-    fun provideWeight(sharedPref: SharedPreferences) = sharedPref.getFloat(KEY_WEIGHT, 80f)
-
-    @Singleton
-    @Provides
-    fun provideFirstLaunch(sharedPref: SharedPreferences) = sharedPref.getBoolean(KEY_FIRST_TIME_TOGGLE, true)
-
-
-    @Provides
-    @Singleton
-    fun provideGson(): Gson {
-        return Gson()
-    }
-
 }

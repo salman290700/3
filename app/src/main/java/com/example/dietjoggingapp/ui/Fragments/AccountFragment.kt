@@ -1,60 +1,78 @@
 package com.example.dietjoggingapp.ui.Fragments
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
+import com.example.dietjoggingapp.databinding.FragmentAccountBinding
+import com.example.dietjoggingapp.other.Constants
+import com.example.dietjoggingapp.other.UiState
+import com.example.dietjoggingapp.ui.LoginActivity
+import com.example.dietjoggingapp.ui.viewmodels.AuthViewModel
+import com.example.dietjoggingapp.utility.hide
+import com.example.dietjoggingapp.utility.show
+import com.example.dietjoggingapp.utility.toast
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AccountFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class AccountFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var binding: FragmentAccountBinding
+    val viewModel: AuthViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_account, container, false)
+        binding = FragmentAccountBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AccountFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AccountFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    fun observer() {
+        viewModel.logout.observe(viewLifecycleOwner, Observer {state ->
+            when(state) {
+                is UiState.Success -> {
+                    binding.progressCircular.hide()
+                    toast(state.data)
+                    binding.btnLogout.hide()
+
+                }
+                is UiState.failure -> {
+                    binding.progressCircular.hide()
+                    toast(state.error)
+                }
+                is UiState.Loading -> {
+                    binding.progressCircular.show()
                 }
             }
+        })
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.btnLogout.setOnClickListener {
+
+            val firebaseAuth = FirebaseAuth.getInstance()
+
+            viewModel.logout()
+            Log.d("TAG", "onViewCreated: viewModel" + firebaseAuth.currentUser?.uid.toString().trim())
+            firebaseAuth.signOut()
+            Log.d("TAG", "onViewCreated: " + firebaseAuth.currentUser?.uid.toString().trim())
+            activity?.run {
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+            }
+        }
+        observer()
     }
 }

@@ -17,12 +17,5 @@ interface AuthRepo {
 
     fun forgotPassword(user: User, result: (UiState<String>) -> Unit)
 
-
-    fun storeSession(id: String, result: (User?) -> Unit)
-
-
-    fun getSession(result: (User?) -> Unit)
-
-
     fun logout(result: () -> Unit)
 }

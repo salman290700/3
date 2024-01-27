@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         val appBar = AppBarConfiguration(
             setOf(
-                R.id.joggingsFragment, R.id.setiingsFragment, R.id.foodsFragment
+                R.id.joggingsFragment, R.id.setiingsFragment, R.id.foodsFragment, R.id.AccountFragment
             )
         )
 

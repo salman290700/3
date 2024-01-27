@@ -63,7 +63,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     var isFIrstRun: Boolean = true
     var isServiceKilled: Boolean = false
 
-    @set:Inject
+
     var weight = 80f
 
     val authViewModel: AuthViewModel by viewModels()
@@ -180,28 +180,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             )
         )
     }
-
-    private fun addBitmap() {
-        val auth: String = FirebaseAuth.getInstance().currentUser?.uid.toString()
-        map?.snapshot { bmp ->
-            var distanceInMeter = 0f
-            for(polyline in pathPoints) {
-                distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline).toInt()
-            }
-            var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
-            val dateTimeStamp = Calendar.getInstance().timeInMillis
-            val caloriesBurned = ((distanceInMeter / 1000f) * weight).toFloat()
-            val jogging = Jogging("", auth, bmp, dateTimeStamp, avgSpeed, distanceInMeter, currentTimeInMilliseconds, caloriesBurned)
-
-            Snackbar.make(
-                requireActivity().findViewById(R.id.joggingFragments),
-                "Run Saved Successfully ${jogging.caloriesBurned}",
-                Snackbar.LENGTH_LONG
-            ).show()
-            Log.d("TAG", "addBitmap: " + auth)
-
-    }
-}
 
     private fun createJogging(){
 //        if (validation()){

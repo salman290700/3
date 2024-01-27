@@ -29,9 +29,7 @@ object RepoModule {
     fun provideAuthRepo(
         auth: FirebaseAuth,
         database: FirebaseFirestore,
-        sharedPreferences: SharedPreferences,
-        gson: Gson
     ): AuthRepo {
-        return AuthRepoImp(auth, database, sharedPreferences, gson)
+        return AuthRepoImp(auth, database)
     }
 }

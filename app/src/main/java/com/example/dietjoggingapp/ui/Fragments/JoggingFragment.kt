@@ -43,14 +43,13 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
 
     private var permissionRequest: MutableList<String> = arrayListOf()
     private val viewModel: MainViewModel by viewModels()
-    private lateinit var binding: FragmentJoggingBinding
+    private lateinit var binding: com.example.dietjoggingapp.databinding.FragmentJoggingBinding
     private lateinit var joggingAdapter: JoggingAdapter
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         binding = FragmentJoggingBinding.inflate(inflater, container, false)
         return binding.root
     }

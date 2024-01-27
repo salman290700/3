@@ -40,12 +40,17 @@ class AuthViewModel @Inject constructor(val auth: AuthRepo): ViewModel() {
             email = email,
             password = password
         ) {
-            _register.value = it
+            _login.value = it
         }
     }
 
-    fun getSession(result: (User?) -> Unit) {
-        auth.getSession(result = result)
-    }
 
+    private val _logout = MutableLiveData<UiState<String>>()
+    val logout: LiveData<UiState<String>>
+    get() = _logout
+    fun logout(){
+        auth.logout {
+            _logout.value
+        }
+    }
 }

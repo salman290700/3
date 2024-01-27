@@ -76,5 +76,13 @@
 
     </fragment>
 
+    <fragment
+        android:id="@+id/AccountFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.AccountFragment"
+        android:label="AccountFragment"
+        >
+        
+    </fragment>
+
 
 </navigation>
