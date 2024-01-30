@@ -65,7 +65,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 
 
     var weight = 80f
-
     val authViewModel: AuthViewModel by viewModels()
     private var objJogging: Jogging? = null
     var imageUris: MutableList<Uri> = arrayListOf()
@@ -73,7 +72,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     var avgSpeed = 0f
     var dateTimeStamp = Calendar.getInstance().timeInMillis
     var caloriesBurned = 0f
-    private var jogging: Jogging? = null
+    var jogging: Jogging? = null
     var bitmap: Bitmap? = null
     var distanceInMeter = 0f
     val addJoggingViewModel: AddJoggingViewModel by viewModels()
@@ -189,9 +188,10 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 //
 //            }
 //        }
-        jogging = getJogging()
-        Log.d("TAG", "createJogging: " + jogging.toString().trim())
-        viewModel.addJogging(jogging = jogging!!)
+        getJogging()
+        Log.d("TAG", "createJogging: ${jogging.toString().trim()}")
+
+
         viewModel.addJogging.observe(viewLifecycleOwner){state ->
             when(state){
                 is UiState.Loading -> {
@@ -204,9 +204,9 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
                 is UiState.Success -> {
                     binding.progressBar.hide()
                     toast(state.data.second)
-                    jogging = state.data.first
-                    Log.d("TAG", "createProject: " + jogging!!.id)
-                    Log.d("TAG", "createProjectname: " + jogging!!.caloriesBurned)
+                    Log.d("TAG", "createJogging: jogging" + jogging?.caloriesBurned.toString().trim())
+                    Log.d("TAG", "createJogging: " + jogging!!.id)
+                    Log.d("TAG", "createjogging: " + jogging!!.caloriesBurned)
                 }
             }
         }
@@ -222,45 +222,52 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     }
 
 
-    private fun getJogging(): Jogging{
-
+    private fun getJogging(){
         map?.snapshot { bmp ->
             var distanceInMeter = 0f
             for(polyline in pathPoints) {
                 distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline)
             }
-            Log.d("TAG", "getJogging: " + distanceInMeter.toString().trim())
+
             var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
             val dateTimeStamp = Calendar.getInstance().timeInMillis
             val caloriesBurned = ((distanceInMeter / 1000f) * user.weight.toFloat())
-            Log.d("TAG", "getJogging: currentTimeInMillis" + currentTimeInMilliseconds.toString().trim())
-            Log.d("TAG", "getJogging: calories burned" + caloriesBurned.toString().trim())
-            Log.d("TAG", "getJogging: dateTimeStamp" + dateTimeStamp.toString().trim())
-            Log.d("TAG", "getJogging: user weight" + user.weight.toString().trim())
-
             this.distanceInMeter = distanceInMeter
             this.jogging = jogging
             this.dateTimeStamp = dateTimeStamp
             this.caloriesBurned = caloriesBurned
             this.avgSpeed = avgSpeed
             this.bitmap = bmp
-            Snackbar.make(
-                requireActivity().findViewById(R.id.joggingFragments),
-                "Run Saved Successfully ${jogging?.caloriesBurned}",
-                Snackbar.LENGTH_LONG
-            ).show()
-            Log.d("TAG", "getJogging: " + distanceInMeter.toString().trim())
+            Log.d("TAG", "getJogging: currentTimeInMillis" + this.currentTimeInMilliseconds.toString().trim())
+            Log.d("TAG", "getJogging: calories burned" + this.caloriesBurned.toString().trim())
+            Log.d("TAG", "getJogging: dateTimeStamp" + this.dateTimeStamp.toString().trim())
+            Log.d("TAG", "getJogging: user weight" + user.weight.toString().trim())
+            Log.d("TAG", "getJogging: distancen in meter" + this.distanceInMeter.toString().trim())
+            Log.d("TAG", "getJogging: bitmap" + this.bitmap.toString().trim())
+            Log.d("TAG", "getJogging: distance in meter" + distanceInMeter.toString().trim())
+            jogging = Jogging("", auth.toString(), null, this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
+            Log.d("TAG", "getJogging: jogging test ${this.jogging?.caloriesBurned.toString().trim() }}")
+            Log.d("TAG", "getJogging: return ${this.jogging?.caloriesBurned.toString().trim()}")
+
+            val document = database.collection(Constants.FirestoreTable.JOGGING).document()
+            if (jogging != null) {
+                jogging?.id = document.id
+                document.set(jogging!!)
+                    .addOnSuccessListener {
+                        Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
+                        Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
+                        Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
+                    }
+                    .addOnFailureListener{
+                        Log.d("TAG", "addJogging: " + it.localizedMessage)
+                    }
+            }else {
+                Log.d("TAG", "getJogging: Joggign is null")
+            }
+            
+            Log.d("TAG", "addJogging: " + jogging?.id)
+            Log.d("TAG", "addJogging: addJogging" + this.caloriesBurned)
         }
-        return Jogging(
-            id = "",
-            userId = auth.toString(),
-            img = bitmap,
-            timestamp =  dateTimeStamp,
-            avgSpeedInKmh = avgSpeed,
-            distanceInMeters = distanceInMeter,
-            timeInMillis = currentTimeInMilliseconds,
-            caloriesBurned = caloriesBurned
-        )
     }
 
     private fun subscribeToObservers() {

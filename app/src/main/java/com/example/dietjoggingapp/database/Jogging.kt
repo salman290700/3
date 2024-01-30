@@ -6,8 +6,6 @@ import android.os.Parcelable
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.android.parcel.Parcelize
 import java.util.Date
-
-
 @Parcelize
 data class Jogging (
     var id: String = "",
@@ -19,4 +17,4 @@ data class Jogging (
     var timeInMillis: Long = 0L,
     var caloriesBurned: Float = 0f,
 //    var date: Date = Date()
-) : Parcelable
+): Parcelable

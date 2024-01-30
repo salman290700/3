@@ -52,8 +52,12 @@ class JoggingRepoImp(
         val document = database.collection(Constants.FirestoreTable.JOGGING).document()
         jogging.id = document.id
         Log.d("TAG", "addJogging: " + jogging.id)
+        Log.d("TAG", "addJogging: addJogging" + jogging.caloriesBurned)
         document.set(jogging)
             .addOnSuccessListener {
+                Log.d("TAG", "addJogging: distance in meters " + jogging.distanceInMeters)
+                Log.d("TAG", "addJogging: calories burned" + jogging.caloriesBurned)
+
                 result.invoke(
                     UiState.Success(Pair(jogging, "Project has been Created..."))
                 )
