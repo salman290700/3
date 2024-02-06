@@ -10,7 +10,7 @@ import java.util.Date
 data class Jogging (
     var id: String = "",
     var userId: String = "",
-    var img: Bitmap? = null,
+    var img: String? = null,
     var timestamp: Long = 0L,
     var avgSpeedInKmh: Float = 0f,
     var distanceInMeters: Float = 0f,

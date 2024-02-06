@@ -9,5 +9,7 @@
     <string name="enter_pass">Please Enter Password</string>
     <string name="longer_pass">Pleases enter longer password</string>
     <string name="login">login</string>
+    <string name="Start">Start</string>
+    <string name="Stop">Stop</string>
 
 </resources>

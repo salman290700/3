@@ -2,7 +2,7 @@ package com.example.dietjoggingapp.ui.Fragments
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -26,24 +26,27 @@ import com.example.dietjoggingapp.other.TrackingUtil
 import com.example.dietjoggingapp.other.UiState
 import com.example.dietjoggingapp.services.Polyline
 import com.example.dietjoggingapp.services.TrackingService
-import com.example.dietjoggingapp.ui.viewmodels.AddJoggingViewModel
-import com.example.dietjoggingapp.ui.viewmodels.AuthViewModel
 import com.example.dietjoggingapp.ui.viewmodels.MainViewModel
 import com.example.dietjoggingapp.utility.hide
 import com.example.dietjoggingapp.utility.show
 import com.example.dietjoggingapp.utility.toast
-import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 import kotlin.math.round
 
 @AndroidEntryPoint
@@ -61,21 +64,14 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     private var menu: Menu? = null
 
     var isFIrstRun: Boolean = true
-    var isServiceKilled: Boolean = false
-
 
     var weight = 80f
-    val authViewModel: AuthViewModel by viewModels()
-    private var objJogging: Jogging? = null
-    var imageUris: MutableList<Uri> = arrayListOf()
-
     var avgSpeed = 0f
     var dateTimeStamp = Calendar.getInstance().timeInMillis
     var caloriesBurned = 0f
     var jogging: Jogging? = null
-    var bitmap: Bitmap? = null
+    var bitmap: String? = ""
     var distanceInMeter = 0f
-    val addJoggingViewModel: AddJoggingViewModel by viewModels()
     val auth = FirebaseAuth.getInstance().currentUser?.uid
 
     val database = FirebaseFirestore.getInstance()
@@ -83,9 +79,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        setHasOptionsMenu(true)
-        val rootView: View = inflater.inflate(R.layout.fragment_tracking, container, false)
+    ): View {
         binding = FragmentTrackingBinding.inflate(inflater, container, false)
         return binding.root
 //        return rootView
@@ -93,16 +87,15 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.mapView?.onCreate(savedInstanceState)
+        binding.mapView.onCreate(savedInstanceState)
         binding.btnToggleRun.setOnClickListener{
             toggleRun()
         }
-
         database.collection(Constants.FirestoreTable.USERS).document(auth.toString())
             .get()
             .addOnCompleteListener {
                 this.user = it.result.toObject(User::class.java)!!
-                Log.d("TAG", "onViewCreated: " + user)
+                Timber.d("onViewCreated ${user.toString().trim()}")
             }
             .addOnFailureListener {
 
@@ -111,13 +104,11 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             zoomToAllJoggingTrack()
             createJogging()
         }
-        binding.mapView?.getMapAsync {
+        binding.mapView.getMapAsync {
             map = it
             addAllPolylines()
         }
         subscribeToObservers()
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -189,8 +180,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 //            }
 //        }
         getJogging()
-        Log.d("TAG", "createJogging: ${jogging.toString().trim()}")
-
+        Timber.d("createJogging: ${jogging.toString().trim()}")
 
         viewModel.addJogging.observe(viewLifecycleOwner){state ->
             when(state){
@@ -213,18 +203,25 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
         stopRun()
     }
 
-    private fun validation(): Boolean {
-        var isValid = true
-//        if (binding.etProjectName.text.isNullOrEmpty()){
-//            isValid = false
-//        }
-        return isValid
-    }
-
-
     private fun getJogging(){
+        var simpleDateFormat = SimpleDateFormat("yyyyMMddHHmmSS", Locale.TAIWAN)
+        var filename = simpleDateFormat.format(Date())
+        var path = activity?.applicationContext?.filesDir?.path
+        var file = File(path, "DietJoggingApp")
+        if(!file.exists()) {
+            file.mkdirs()
+        }
+
+        var file2 = File(file, filename + ".png")
+        var fOut = ByteArrayOutputStream()
+
+
         map?.snapshot { bmp ->
             var distanceInMeter = 0f
+            bmp?.compress(Bitmap.CompressFormat.PNG, 50, fOut)
+            var data = fOut.toByteArray()
+
+
             for(polyline in pathPoints) {
                 distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline)
             }
@@ -237,7 +234,10 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             this.dateTimeStamp = dateTimeStamp
             this.caloriesBurned = caloriesBurned
             this.avgSpeed = avgSpeed
-            this.bitmap = bmp
+            this.bitmap =""
+            fOut.flush()
+            fOut.close()
+
             Log.d("TAG", "getJogging: currentTimeInMillis" + this.currentTimeInMilliseconds.toString().trim())
             Log.d("TAG", "getJogging: calories burned" + this.caloriesBurned.toString().trim())
             Log.d("TAG", "getJogging: dateTimeStamp" + this.dateTimeStamp.toString().trim())
@@ -245,18 +245,32 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             Log.d("TAG", "getJogging: distancen in meter" + this.distanceInMeter.toString().trim())
             Log.d("TAG", "getJogging: bitmap" + this.bitmap.toString().trim())
             Log.d("TAG", "getJogging: distance in meter" + distanceInMeter.toString().trim())
-            jogging = Jogging("", auth.toString(), null, this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
+            jogging = Jogging("", auth.toString(), "", this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
             Log.d("TAG", "getJogging: jogging test ${this.jogging?.caloriesBurned.toString().trim() }}")
             Log.d("TAG", "getJogging: return ${this.jogging?.caloriesBurned.toString().trim()}")
 
             val document = database.collection(Constants.FirestoreTable.JOGGING).document()
+
             if (jogging != null) {
                 jogging?.id = document.id
                 document.set(jogging!!)
                     .addOnSuccessListener {
+                        var storage = FirebaseStorage.getInstance().getReference("photo/jogging/${user.userId}/${document.id}.png")
+                        storage.putBytes(data)
+                            .addOnSuccessListener {
+                                toast("Success")
+                                Log.d("TAG", "getJogging: Success Save gmbar")
+                            }
+                            .addOnFailureListener{
+                                Toast.makeText(activity?.applicationContext, "Error : ${it.toString().trim()}", Toast.LENGTH_SHORT)
+                            }
+                        val imageUrl = storage.downloadUrl.toString().trim();
+                        val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
+                        document2.update("img", imageUrl)
                         Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
                         Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
                         Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
+                        Log.d("TAG", "getJogging: ${document2.id} ${imageUrl}")
                     }
                     .addOnFailureListener{
                         Log.d("TAG", "addJogging: " + it.localizedMessage)
@@ -285,7 +299,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
         TrackingService.timingRunInMillis.observe(viewLifecycleOwner, Observer {
             currentTimeInMilliseconds = it
             val formattedTime = TrackingUtil.getFormattedStopWatchTime(currentTimeInMilliseconds, true)
-            binding.tvTimer.text = formattedTime
+            binding.tvTimer.text = formattedTime.trim()
         })
     }
 
@@ -302,13 +316,13 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
         this.isTracking = isTracking
         isFIrstRun = false
         if(!isTracking && isFIrstRun) {
-            binding.btnToggleRun.text = "Start"
+            binding.btnToggleRun.text = getString(R.string.Start).trim()
             binding.btnToggleFinishRun.visibility = View.GONE
         } else if(!isTracking && !isFIrstRun) {
-            binding.btnToggleRun.text = "Start"
+            binding.btnToggleRun.text = getString(R.string.Start).trim()
             binding.btnToggleFinishRun.visibility = View.VISIBLE
         } else {
-            binding.btnToggleRun.text = "Stop"
+            binding.btnToggleRun.text = getString(R.string.Stop).trim()
             menu?.getItem(0)?.isVisible = true
             binding.btnToggleFinishRun.visibility = View.GONE
         }
