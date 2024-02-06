@@ -278,7 +278,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             }else {
                 Log.d("TAG", "getJogging: Joggign is null")
             }
-            
             Log.d("TAG", "addJogging: " + jogging?.id)
             Log.d("TAG", "addJogging: addJogging" + this.caloriesBurned)
         }
