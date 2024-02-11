@@ -16,5 +16,5 @@ data class Jogging (
     var distanceInMeters: Float = 0f,
     var timeInMillis: Long = 0L,
     var caloriesBurned: Float = 0f,
-//    var date: Date = Date()
+    var date: Date = Date()
 ): Parcelable

@@ -221,14 +221,13 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             bmp?.compress(Bitmap.CompressFormat.PNG, 50, fOut)
             var data = fOut.toByteArray()
 
-
             for(polyline in pathPoints) {
                 distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline)
             }
 
             var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
             val dateTimeStamp = Calendar.getInstance().timeInMillis
-            val caloriesBurned = ((distanceInMeter / 1000f) * user.weight.toFloat())
+            val caloriesBurned = ((distanceInMeter / 1000f) * user.weight)
             this.distanceInMeter = distanceInMeter
             this.jogging = jogging
             this.dateTimeStamp = dateTimeStamp
@@ -257,25 +256,29 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
                     .addOnSuccessListener {
                         var storage = FirebaseStorage.getInstance().getReference("photo/jogging/${user.userId}/${document.id}.png")
                         storage.putBytes(data)
-                            .addOnSuccessListener {
+                            .addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    storage.downloadUrl
+                                        .addOnCompleteListener {
+                                            var imageUrl = it.result.toString()
+                                            val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
+                                            document2.update("img", imageUrl)
+                                            Log.d("TAG", "getJogging: url ${imageUrl}")
+                                        }
+                                } else {
+                                    Log.d("TAG", "getJogging: Image upload task is not successfull")
+                                }
+                            }
                                 toast("Success")
                                 Log.d("TAG", "getJogging: Success Save gmbar")
                             }
                             .addOnFailureListener{
                                 Toast.makeText(activity?.applicationContext, "Error : ${it.toString().trim()}", Toast.LENGTH_SHORT)
                             }
-                        val imageUrl = storage.downloadUrl.toString().trim();
-                        val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
-                        document2.update("img", imageUrl)
                         Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
                         Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
                         Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
-                        Log.d("TAG", "getJogging: ${document2.id} ${imageUrl}")
-                    }
-                    .addOnFailureListener{
-                        Log.d("TAG", "addJogging: " + it.localizedMessage)
-                    }
-            }else {
+                    }else {
                 Log.d("TAG", "getJogging: Joggign is null")
             }
             Log.d("TAG", "addJogging: " + jogging?.id)
@@ -284,17 +287,14 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     }
 
     private fun subscribeToObservers() {
-
         TrackingService.isTracking.observe(viewLifecycleOwner, Observer {
             updateTracking(it)
         })
-
         TrackingService.pathPoints.observe(viewLifecycleOwner, Observer{
             pathPoints = it
             addLatestPolyline()
             moveCameraToUser()
         })
-
         TrackingService.timingRunInMillis.observe(viewLifecycleOwner, Observer {
             currentTimeInMilliseconds = it
             val formattedTime = TrackingUtil.getFormattedStopWatchTime(currentTimeInMilliseconds, true)

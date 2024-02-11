@@ -8,7 +8,7 @@ import dagger.Module
 
 
 interface JoggingRepo {
-    fun getJoggings(user: User?, result: (UiState<List<Jogging>>) -> Unit )
+    fun getJoggings(userId: String, result: (UiState<List<Jogging>>) -> Unit )
     fun addJogging(jogging: Jogging, result: (UiState<Pair<Jogging, String>>) -> Unit)
     fun updateJogging(jogging: Jogging, result: (UiState<String>) -> Unit)
     suspend fun uploadSingleFile(fileUri: Uri, onResult: (UiState<Uri>) -> Unit)

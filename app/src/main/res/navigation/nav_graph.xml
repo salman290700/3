@@ -10,7 +10,7 @@
     <fragment
         android:id="@+id/joggingsFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.JoggingFragment"
-        android:label="JoggingFragments" >
+        android:label="JoggingsFragments" >
         <action
             android:id="@+id/action_joggingFragments_to_settingsFragment"
             app:destination="@id/settingsFragment" />

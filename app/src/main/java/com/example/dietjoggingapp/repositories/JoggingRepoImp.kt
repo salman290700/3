@@ -21,22 +21,23 @@ class JoggingRepoImp(
     private val database:FirebaseFirestore,
     private val storageReference:StorageReference
 ): JoggingRepo {
-    override fun getJoggings(user: User?, result: (UiState<List<Jogging>>) -> Unit) {
+    override fun getJoggings(userId: String, result: (UiState<List<Jogging>>) -> Unit) {
         database.collection(Constants.FirestoreTable.JOGGING)
-            .whereEqualTo(Constants.FireStoreDocumentField.USER_ID, user?.userId)
-            .orderBy(Constants.FireStoreDocumentField.DATE, Query.Direction.DESCENDING)
+            .whereEqualTo(Constants.FireStoreDocumentField.USER_ID, userId)
+            .orderBy("date", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener {
                 val projects = arrayListOf<Jogging>()
-                Log.d("TAG", "getProjects: " + user?.userId)
+                Log.d("TAG", "getProjects: " + userId.trim())
                 for (document in it){
                     val project = document.toObject(Jogging::class.java)
                     projects.add(project)
+                    Log.d("TAG", "getJoggings: ${project.toString().trim()}")
                 }
                 result.invoke(
                     UiState.Success(projects)
                 )
-                Log.d("TAG", "getProjects: " + (user?.userId ?: ""))
+                Log.d("TAG", "getProjects: ${userId.trim()}")
             }
             .addOnFailureListener{
                 result.invoke(
@@ -44,7 +45,7 @@ class JoggingRepoImp(
                         it.localizedMessage.toString()
                     )
                 )
-                Log.e("TAG", "getProjects: " + (user?.userId ?: ""))
+                Log.e("TAG", "getProjects: ${userId.trim()} ${it.localizedMessage.toString().trim()}")
             }
     }
 

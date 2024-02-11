@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -19,14 +18,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.adapters.JoggingAdapter
+import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.databinding.FragmentJoggingBinding
 import com.example.dietjoggingapp.other.Constants.REQUEST_CODE_LOCATION_PERMISSION
-import com.example.dietjoggingapp.other.SortType
 import com.example.dietjoggingapp.other.TrackingUtil
 import com.example.dietjoggingapp.other.UiState
 import com.example.dietjoggingapp.ui.viewmodels.MainViewModel
 import com.example.dietjoggingapp.utility.hide
 import com.example.dietjoggingapp.utility.show
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
@@ -45,6 +46,9 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
     private val viewModel: MainViewModel by viewModels()
     private lateinit var binding: com.example.dietjoggingapp.databinding.FragmentJoggingBinding
     private lateinit var joggingAdapter: JoggingAdapter
+    private lateinit var user: User
+    private lateinit var firebaseFirestore: FirebaseFirestore
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,34 +60,57 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        firebaseFirestore = FirebaseFirestore.getInstance()
+
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
             permissionLauncher()
         }else {
             permissionLauncherVersionQLater()
         }
+
+        requestPermission()
+
+        joggingAdapter = JoggingAdapter()
+
+
+
+//        binding.spFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//            override fun onNothingSelected(p0: AdapterView<*>?) {
+//
+//            }
+//
+//            override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+//                when(pos) {
+//                    0 -> viewModel.sortJogging(SortType.DATE)
+//                    1 -> viewModel.sortJogging(SortType.DISTANCE)
+//                    2 -> viewModel.sortJogging(SortType.TIME_IN_MILLIS)
+//                    3 -> viewModel.sortJogging(SortType.CALORIES_BURNED)
+//                    4 -> viewModel.sortJogging(SortType.AVG_SPEED)
+//                }
+//            }
+//        }
+
+        val firebaseAuth = FirebaseAuth.getInstance().currentUser?.uid?.toString()?.trim()
+        viewModel.getJogging(firebaseAuth.toString().trim())
+
+
+
+//        viewModel.joggingSortByDate.observe(viewLifecycleOwner, Observer {
+//            joggingAdapter.submitList(it)
+//        })
+
+
     }
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestPermission()
-        setupRecyclerView()
 
-        binding.spFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-
-            }
-
-            override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-                when(pos) {
-                    0 -> viewModel.sortJogging(SortType.DATE)
-                    1 -> viewModel.sortJogging(SortType.DISTANCE)
-                    2 -> viewModel.sortJogging(SortType.TIME_IN_MILLIS)
-                    3 -> viewModel.sortJogging(SortType.CALORIES_BURNED)
-                    4 -> viewModel.sortJogging(SortType.AVG_SPEED)
-                }
-            }
+        binding.fab.setOnClickListener {
+            findNavController().navigate(R.id.action_joggingFragments_to_trackingFragment)
         }
-
+        binding.rvRuns.adapter = joggingAdapter
         viewModel.getJoggings.observe(viewLifecycleOwner, Observer{state ->
             when(state) {
                 is UiState.Loading -> {
@@ -92,27 +119,16 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
                 is UiState.Success -> {
                     binding.progressBar.hide()
                     joggingAdapter.submitList(state.data.toMutableList())
+                    Log.d(TAG, "onViewCreated: ${state.data.toString().trim()}")
                 }
                 is UiState.failure -> {
                     binding.progressBar.hide()
                 }
             }
         })
-
-//        viewModel.joggingSortByDate.observe(viewLifecycleOwner, Observer {
-//            joggingAdapter.submitList(it)
-//        })
-
-        binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_joggingFragments_to_trackingFragment)
-        }
     }
 
-    private fun setupRecyclerView() = binding.rvRuns.apply {
-        joggingAdapter = JoggingAdapter()
-        adapter = joggingAdapter
-        layoutManager = LinearLayoutManager(requireContext())
-        }
+
 
     private fun requestPermissions() {
         if (TrackingUtil.locationPermissions(requireContext())) {

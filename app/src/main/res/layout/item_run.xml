@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     android:padding="@dimen/_8sdp">
     <ImageView
         android:id="@+id/ivRunImage"
@@ -15,59 +14,108 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvDate"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/layoutText"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_16sdp"
-        android:text="Date"
-        app:layout_constraintEnd_toStartOf="@+id/tvTime"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivRunImage"
-        />
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_16sdp"
-        android:text="Time"
-        app:layout_constraintEnd_toStartOf="@id/tvDistance"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@id/tvDate"
-        app:layout_constraintTop_toBottomOf="@id/ivRunImage"
-        />
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvDistance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_16sdp"
-        android:text="Distance"
-        app:layout_constraintEnd_toStartOf="@id/tvAvgSpeed"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@id/tvTime"
-        app:layout_constraintTop_toBottomOf="@id/ivRunImage"
-        />
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvAvgSpeed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_16sdp"
-        android:text="Distance"
-        app:layout_constraintStart_toEndOf="@id/tvDistance"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintEnd_toStartOf="@id/tvCalories"
-        app:layout_constraintTop_toBottomOf="@id/ivRunImage"
-        />
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvCalories"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_16sdp"
-        android:text="Distance"
-        app:layout_constraintStart_toEndOf="@id/tvAvgSpeed"
-        app:layout_constraintHorizontal_bias="0.5"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivRunImage"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        >
+        <LinearLayout
+            android:id="@+id/layoutDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="@dimen/_72sdp"
+                android:layout_height="wrap_content"
+                android:text="Date : "/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="@dimen/_72sdp"
+                android:layout_height="wrap_content"
+                android:text="Time : "/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutDistance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="@dimen/_72sdp"
+                android:layout_height="wrap_content"
+                android:text="Time : "/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutAvgSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="@dimen/_72sdp"
+                android:layout_height="wrap_content"
+                android:text="Avg. Speed : "/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvAvgSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutCalories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_20sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="@dimen/_72sdp"
+                android:layout_height="wrap_content"
+                android:text="Avg. Speed : "/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvCalories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                />
+        </LinearLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

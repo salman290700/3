@@ -36,7 +36,7 @@ object Constants {
 
     object FireStoreDocumentField{
         val DATE = "date"
-        val USER_ID = "user_id"
+        val USER_ID = "userId"
     }
 
     object sharedPreferences {

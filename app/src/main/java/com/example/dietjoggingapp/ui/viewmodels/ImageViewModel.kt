@@ -20,9 +20,9 @@ class ImageViewModel ( val repo: JoggingRepo): ViewModel() {
     val getJogging: LiveData<UiState<List<Jogging>>>
     get() = _getJogging
 
-    fun getJoggings(user: User?) {
+    fun getJoggings(userId: String) {
         _getJogging.value = UiState.Loading
-        repo.getJoggings(user) {
+        repo.getJoggings(userId) {
             _getJogging.value = it
         }
     }

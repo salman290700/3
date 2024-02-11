@@ -1,29 +1,33 @@
 package com.example.dietjoggingapp.adapters
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.database.Jogging
 import com.example.dietjoggingapp.databinding.ItemRunBinding
 import com.example.dietjoggingapp.other.TrackingUtil
-import com.example.dietjoggingapp.other.UiState
+import com.squareup.picasso.Picasso
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
-class JoggingAdapter: RecyclerView.Adapter<JoggingAdapter.JoggingViewHolder>() {
+class JoggingAdapter(): RecyclerView.Adapter<JoggingAdapter.JoggingViewHolder>() {
 
 //    val ivRunImage: ImageView = R.id.ivRunImage
     inner class JoggingViewHolder(val binding: ItemRunBinding): RecyclerView.ViewHolder(binding.root) {
-
         fun bind(item: Jogging) {
-            binding.ivRunImage.apply {
-                Glide.with(this).load(item.img).into(binding.ivRunImage)
-            }
+            val requestOption = RequestOptions()
+            requestOption.placeholder(R.drawable.ic_baseline_delete_24)
+            requestOption.error(R.drawable.ic_baseline_delete_24)
+            Picasso.get().load(item.img).into(binding.ivRunImage)
+            Log.d("TAG", "bind: ${item.img}")
             val calendar = Calendar.getInstance().apply {
                 timeInMillis = item.timeInMillis
             }
@@ -43,17 +47,6 @@ class JoggingAdapter: RecyclerView.Adapter<JoggingAdapter.JoggingViewHolder>() {
         }
     }
 
-    val diffCallback = object: DiffUtil.ItemCallback<Jogging>() {
-        override fun areItemsTheSame(oldItem: Jogging, newItem: Jogging): Boolean {
-            return  oldItem.id == newItem.id
-        }
-
-        override fun areContentsTheSame(oldItem: Jogging, newItem: Jogging): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
-        }
-    }
-    val differ = AsyncListDiffer(this, diffCallback)
-
     private var list: MutableList<Jogging> = arrayListOf()
 
     fun submitList(list: MutableList<Jogging>){
@@ -72,6 +65,6 @@ class JoggingAdapter: RecyclerView.Adapter<JoggingAdapter.JoggingViewHolder>() {
     }
 
     override fun getItemCount(): Int {
-        return differ.currentList.size
+        return list.size
     }
 }

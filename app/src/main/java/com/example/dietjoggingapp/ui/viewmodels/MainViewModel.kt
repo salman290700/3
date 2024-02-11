@@ -18,9 +18,9 @@ class MainViewModel @Inject constructor(var joggingRepo: JoggingRepo): ViewModel
     private val _getJogging = MutableLiveData<UiState<List<Jogging>>>()
     val getJoggings: LiveData<UiState<List<Jogging>>>
         get() = _getJogging
-    fun getJogging(user: User?) {
+    fun getJogging(userId: String) {
         _getJogging.value = UiState.Loading
-        joggingRepo.getJoggings(user) {
+        joggingRepo.getJoggings(userId) {
             _getJogging.value = it
         }
     }
