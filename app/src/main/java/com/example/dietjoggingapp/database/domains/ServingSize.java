@@ -1,7 +1,8 @@
 
-package com.example.movieapp;
+package com.example.dietjoggingapp.database.domains;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,15 +12,18 @@ public class ServingSize {
     @SerializedName("units")
     @Expose
     private String units;
+    @SerializedName("desc")
+    @Expose
+    private String desc;
     @SerializedName("qty")
     @Expose
-    private Double qty;
+    private Float qty;
     @SerializedName("grams")
     @Expose
-    private Double grams;
+    private Float grams;
     @SerializedName("scale")
     @Expose
-    private Double scale;
+    private Float scale;
 
     public String getUnits() {
         return units;
@@ -29,27 +33,35 @@ public class ServingSize {
         this.units = units;
     }
 
-    public Double getQty() {
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public Float getQty() {
         return qty;
     }
 
-    public void setQty(Double qty) {
+    public void setQty(Float qty) {
         this.qty = qty;
     }
 
-    public Double getGrams() {
+    public Float getGrams() {
         return grams;
     }
 
-    public void setGrams(Double grams) {
+    public void setGrams(Float grams) {
         this.grams = grams;
     }
 
-    public Double getScale() {
+    public Float getScale() {
         return scale;
     }
 
-    public void setScale(Double scale) {
+    public void setScale(Float scale) {
         this.scale = scale;
     }
 

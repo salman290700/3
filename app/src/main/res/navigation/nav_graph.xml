@@ -25,7 +25,7 @@
         android:label="SetUpFragment" >
         <action
             android:id="@+id/action_setUpFragment_to_joggingFragments"
-            app:destination="@id/joggingFragments" />
+            app:destination="@id/joggingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -33,7 +33,7 @@
         android:label="SettingsFragment" >
         <action
             android:id="@+id/action_settingsFragment_to_joggingFragments"
-            app:destination="@id/joggingFragments" />
+            app:destination="@id/joggingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/statisticsFragment"
@@ -71,7 +71,7 @@
     </fragment>
     <fragment
         android:id="@+id/foodsFragment"
-        android:name="com.example.dietjoggingapp.ui.Fragments.addFoodCalorie"
+        android:name="com.example.dietjoggingapp.ui.Fragments.FoodSuggestFragment"
         android:label="CalorieFragment">
 
     </fragment>
@@ -83,6 +83,12 @@
         >
         
     </fragment>
+
+    <fragment
+        android:id="@+id/AccountDetailFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.AccountDetailFragment"
+        android:label="AccountDetailFragment"
+        />
 
 
 </navigation>

@@ -1,8 +1,12 @@
 package com.example.dietjoggingapp.ui.Fragments
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.media.Image
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -14,6 +18,8 @@ import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.database.Jogging
 import com.example.dietjoggingapp.database.User
+import com.example.dietjoggingapp.database.domains.ActiivtyClassified
+import com.example.dietjoggingapp.database.domains.ActivityClassified
 import com.example.dietjoggingapp.databinding.FragmentTrackingBinding
 import com.example.dietjoggingapp.other.Constants
 import com.example.dietjoggingapp.other.Constants.ACTION_PAUSE_SERVICE
@@ -38,19 +44,18 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.round
 
 @AndroidEntryPoint
-class TrackingFragment: Fragment(R.layout.fragment_tracking) {
+class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListener {
     val viewModel: MainViewModel by viewModels()
     private lateinit var binding: FragmentTrackingBinding
     private lateinit var user: User
@@ -58,6 +63,8 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     
     private var isTracking = false
     private var pathPoints = mutableListOf<Polyline>()
+
+    private var isStart: Boolean = false
     
     private var currentTimeInMilliseconds = 0L
     
@@ -74,6 +81,28 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     var distanceInMeter = 0f
     val auth = FirebaseAuth.getInstance().currentUser?.uid
 
+    private val TIME_STAMP = 100
+    private val TAG: String = "Tracking Fragment"
+    private lateinit var ax: MutableList<Float>
+    private lateinit var ay: MutableList<Float>
+    private lateinit var az: MutableList<Float>
+
+    private lateinit var gx: MutableList<Float>
+    private lateinit var gy: MutableList<Float>
+    private lateinit var gz: MutableList<Float>
+
+    private lateinit var lx: MutableList<Float>
+    private lateinit var ly: MutableList<Float>
+    private lateinit var lz: MutableList<Float>
+
+    private lateinit var sensorManager: SensorManager
+    private lateinit var mAccelerometer: Sensor
+    private lateinit var mGroScope: Sensor
+    private lateinit var mLinearAcceleration: Sensor
+
+    private var results: FloatArray? = null
+    private lateinit  var activityClassifier: ActivityClassified
+
     val database = FirebaseFirestore.getInstance()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,6 +116,8 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
         binding.mapView.onCreate(savedInstanceState)
         binding.btnToggleRun.setOnClickListener{
             toggleRun()
@@ -289,6 +320,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     private fun subscribeToObservers() {
         TrackingService.isTracking.observe(viewLifecycleOwner, Observer {
             updateTracking(it)
+
         })
         TrackingService.pathPoints.observe(viewLifecycleOwner, Observer{
             pathPoints = it
@@ -300,12 +332,23 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
             val formattedTime = TrackingUtil.getFormattedStopWatchTime(currentTimeInMilliseconds, true)
             binding.tvTimer.text = formattedTime.trim()
         })
+
+        TrackingService.isStart.observe(viewLifecycleOwner, Observer {
+            if (it > BigDecimal(0.5)) {
+                isStart = true
+            }
+            else {
+                isStart = false
+            }
+        })
     }
 
     private fun toggleRun() {
         if(isTracking) {
             menu?.getItem(0)?.isVisible = true
             sendCommandToService(ACTION_PAUSE_SERVICE)
+
+
         }else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
         }
@@ -314,10 +357,10 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     private fun updateTracking(isTracking: Boolean) {
         this.isTracking = isTracking
         isFIrstRun = false
-        if(!isTracking && isFIrstRun) {
+        if(!isTracking && isFIrstRun){ // &&  !isStart) {
             binding.btnToggleRun.text = getString(R.string.Start).trim()
             binding.btnToggleFinishRun.visibility = View.GONE
-        } else if(!isTracking && !isFIrstRun) {
+        } else if(!isTracking && !isFIrstRun ){ //&& !isStart) {
             binding.btnToggleRun.text = getString(R.string.Start).trim()
             binding.btnToggleFinishRun.visibility = View.VISIBLE
         } else {
@@ -384,7 +427,11 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     }
 
     override fun onPause() {
+
         super.onPause()
+        sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST)
+        sensorManager.registerListener(this, mGroScope, SensorManager.SENSOR_DELAY_FASTEST)
+        sensorManager.registerListener(this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST)
         binding.mapView?.onPause()
     }
 
@@ -401,5 +448,35 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking) {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         binding.mapView?.onSaveInstanceState(outState)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+
+    }
+
+
+    
+
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        TODO("Not yet implemented")
+    }
+
+    private fun toFloatArray(data: kotlin.collections.ArrayList<Float>): FloatArray? {
+        var i = 0
+        val array = FloatArray(data.size)
+        for (f in data) {
+            array[i++] = f ?: Float.NaN
+        }
+        return array
+    }
+
+    private fun toFloatArray2(data: FloatArray?): kotlin.collections.ArrayList<Float> {
+        var i = 0
+        val array = kotlin.collections.ArrayList<Float>()
+        for (f in data!!) {
+            array[i++] = f ?: Float.NaN
+        }
+        return array
     }
 }

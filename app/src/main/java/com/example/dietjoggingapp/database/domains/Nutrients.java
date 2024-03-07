@@ -1,7 +1,8 @@
 
-package com.example.movieapp;
+package com.example.dietjoggingapp.database.domains;
 
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -73,7 +74,7 @@ public class Nutrients {
     private Double vitaminA;
     @SerializedName("vitaminC")
     @Expose
-    private Double vitaminC;
+    private Integer vitaminC;
     @SerializedName("vitaminD")
     @Expose
     private Double vitaminD;
@@ -136,10 +137,10 @@ public class Nutrients {
     private Double choline;
     @SerializedName("alcohol")
     @Expose
-    private Integer alcohol;
+    private Double alcohol;
     @SerializedName("caffeine")
     @Expose
-    private Integer caffeine;
+    private Double caffeine;
     @SerializedName("gluten")
     @Expose
     private Integer gluten;
@@ -178,7 +179,7 @@ public class Nutrients {
     private Double inositol;
     @SerializedName("mannitol")
     @Expose
-    private Double mannitol;
+    private Integer mannitol;
 
     public Double getCaloriesKCal() {
         return caloriesKCal;
@@ -348,11 +349,11 @@ public class Nutrients {
         this.vitaminA = vitaminA;
     }
 
-    public Double getVitaminC() {
+    public Integer getVitaminC() {
         return vitaminC;
     }
 
-    public void setVitaminC(Double vitaminC) {
+    public void setVitaminC(Integer vitaminC) {
         this.vitaminC = vitaminC;
     }
 
@@ -516,19 +517,19 @@ public class Nutrients {
         this.choline = choline;
     }
 
-    public Integer getAlcohol() {
+    public Double getAlcohol() {
         return alcohol;
     }
 
-    public void setAlcohol(Integer alcohol) {
+    public void setAlcohol(Double alcohol) {
         this.alcohol = alcohol;
     }
 
-    public Integer getCaffeine() {
+    public Double getCaffeine() {
         return caffeine;
     }
 
-    public void setCaffeine(Integer caffeine) {
+    public void setCaffeine(Double caffeine) {
         this.caffeine = caffeine;
     }
 
@@ -628,11 +629,11 @@ public class Nutrients {
         this.inositol = inositol;
     }
 
-    public Double getMannitol() {
+    public Integer getMannitol() {
         return mannitol;
     }
 
-    public void setMannitol(Double mannitol) {
+    public void setMannitol(Integer mannitol) {
         this.mannitol = mannitol;
     }
 

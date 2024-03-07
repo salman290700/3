@@ -60,6 +60,9 @@ class AccountFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.btnAccount.setOnClickListener {
+            findNavController().navigate(R.id.AccountDetailFragment)
+        }
         binding.btnLogout.setOnClickListener {
 
             val firebaseAuth = FirebaseAuth.getInstance()

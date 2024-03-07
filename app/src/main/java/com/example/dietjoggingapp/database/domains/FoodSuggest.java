@@ -2,11 +2,10 @@
 package com.example.dietjoggingapp.database.domains;
 
 import java.util.List;
+import javax.annotation.processing.Generated;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-import javax.annotation.processing.Generated;
 
 @Generated("jsonschema2pojo")
 public class FoodSuggest {
@@ -31,19 +30,19 @@ public class FoodSuggest {
     private Integer cookTime;
     @SerializedName("ingredients")
     @Expose
-    private List<com.example.movieapp.Ingredient> ingredients;
+    private List<Ingredient> ingredients;
     @SerializedName("steps")
     @Expose
-    private List<String> steps;
+    private List<Step> steps;
     @SerializedName("servings")
     @Expose
     private Integer servings;
     @SerializedName("servingSizes")
     @Expose
-    private List<com.example.movieapp.ServingSize__1> servingSizes;
+    private List<ServingSize__1> servingSizes;
     @SerializedName("nutrients")
     @Expose
-    private com.example.movieapp.Nutrients nutrients;
+    private Nutrients nutrients;
     @SerializedName("image")
     @Expose
     private String image;
@@ -96,19 +95,19 @@ public class FoodSuggest {
         this.cookTime = cookTime;
     }
 
-    public List<com.example.movieapp.Ingredient> getIngredients() {
+    public List<Ingredient> getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(List<com.example.movieapp.Ingredient> ingredients) {
+    public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
     }
 
-    public List<String> getSteps() {
+    public List<Step> getSteps() {
         return steps;
     }
 
-    public void setSteps(List<String> steps) {
+    public void setSteps(List<Step> steps) {
         this.steps = steps;
     }
 
@@ -120,19 +119,19 @@ public class FoodSuggest {
         this.servings = servings;
     }
 
-    public List<com.example.movieapp.ServingSize__1> getServingSizes() {
+    public List<ServingSize__1> getServingSizes() {
         return servingSizes;
     }
 
-    public void setServingSizes(List<com.example.movieapp.ServingSize__1> servingSizes) {
+    public void setServingSizes(List<ServingSize__1> servingSizes) {
         this.servingSizes = servingSizes;
     }
 
-    public com.example.movieapp.Nutrients getNutrients() {
+    public Nutrients getNutrients() {
         return nutrients;
     }
 
-    public void setNutrients(com.example.movieapp.Nutrients nutrients) {
+    public void setNutrients(Nutrients nutrients) {
         this.nutrients = nutrients;
     }
 

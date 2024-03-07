@@ -66,6 +66,7 @@
             android:orientation="vertical"
             >
             <LinearLayout
+                android:id="@+id/btn_account"
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_width="match_parent"
                 android:layout_marginHorizontal="@dimen/_48sdp"

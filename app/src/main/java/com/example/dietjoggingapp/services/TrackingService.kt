@@ -9,6 +9,10 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationRequest
 import android.os.Build
@@ -19,6 +23,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.example.dietjoggingapp.R
+import com.example.dietjoggingapp.database.domains.ActivityClassified
 import com.example.dietjoggingapp.other.Constants
 import com.example.dietjoggingapp.other.Constants.ACTION_PAUSE_SERVICE
 import com.example.dietjoggingapp.other.Constants.ACTION_START_OR_RESUME_SERVICE
@@ -43,13 +48,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.math.BigDecimal
 import javax.inject.Inject
 
 typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
 
 @AndroidEntryPoint
-class TrackingService: LifecycleService() {
+class TrackingService: LifecycleService(), SensorEventListener {
 
     var isFirstRun = true
 
@@ -67,10 +73,33 @@ class TrackingService: LifecycleService() {
 //    var isFIrstRun: Boolean = true
     var isServiceKilled: Boolean = false
 
+    private val TIME_STAMP = 100
+    private val TAG: String = "Tracking Fragment"
+    private lateinit var ax: MutableList<Float>
+    private lateinit var ay: MutableList<Float>
+    private lateinit var az: MutableList<Float>
+
+    private lateinit var gx: MutableList<Float>
+    private lateinit var gy: MutableList<Float>
+    private lateinit var gz: MutableList<Float>
+
+    private lateinit var lx: MutableList<Float>
+    private lateinit var ly: MutableList<Float>
+    private lateinit var lz: MutableList<Float>
+
+    private lateinit var sensorManager: SensorManager
+    private lateinit var mAccelerometer: Sensor
+    private lateinit var mGroScope: Sensor
+    private lateinit var mLinearAcceleration: Sensor
+
+    private var results: FloatArray? = null
+    private lateinit  var activityClassifier: ActivityClassified
+
     companion object {
         val timingRunInMillis = MutableLiveData<Long>()
         val isTracking = MutableLiveData<Boolean>()
         val pathPoints = MutableLiveData<Polylines>()
+        var isStart = MutableLiveData<BigDecimal>()
 //        val isFirstRun = MutableLiveData<Boolean>()
     }
 
@@ -80,6 +109,7 @@ class TrackingService: LifecycleService() {
         pathPoints.postValue(mutableListOf())
         timingRunInMillis.postValue(0L)
         timingRungInSeconds.postValue(0L)
+        isStart.postValue((round(results?.get(2)!!.toFloat(), 2)))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -94,6 +124,29 @@ class TrackingService: LifecycleService() {
                         Timber.d("Resuming Service...")
                         startTimer()
                     }
+
+                    ax = arrayListOf()
+                    ay = arrayListOf()
+                    az = arrayListOf()
+
+                    gx = arrayListOf()
+                    gy = arrayListOf()
+                    gz = arrayListOf()
+
+                    lx = arrayListOf()
+                    ly = arrayListOf()
+                    lz = arrayListOf()
+
+                    sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+                    mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
+                    mGroScope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)!!
+                    mLinearAcceleration = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)!!
+
+                    activityClassifier = ActivityClassified(this.applicationContext)
+
+                    sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST)
+                    sensorManager.registerListener(this, mGroScope, SensorManager.SENSOR_DELAY_FASTEST)
+                    sensorManager.registerListener(this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST)
                     Timber.d("Started or resume service")
                 }
                 /* Pause Service */
@@ -109,6 +162,52 @@ class TrackingService: LifecycleService() {
             }
         }
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun predictActivity() {
+        var data = java.util.ArrayList<Float>()
+
+        if(ax.size >= TIME_STAMP && ay.size >= TIME_STAMP && az.size >= TIME_STAMP &&
+            gx.size >= TIME_STAMP && gy.size >= TIME_STAMP && gz.size >= TIME_STAMP &&
+            lx.size >= TIME_STAMP && ly.size >= TIME_STAMP && lz.size >= TIME_STAMP
+        ) {
+
+            data.addAll(ax.subList(0, TIME_STAMP))
+            data.addAll(ay.subList(0, TIME_STAMP))
+            data.addAll(az.subList(0, TIME_STAMP))
+
+            data.addAll(gx.subList(0, TIME_STAMP))
+            data.addAll(gy.subList(0, TIME_STAMP))
+            data.addAll(gz.subList(0, TIME_STAMP))
+
+            data.addAll(lx.subList(0, TIME_STAMP))
+            data.addAll(ly.subList(0, TIME_STAMP))
+            data.addAll(lz.subList(0, TIME_STAMP))
+            val list= data.toFloatArray()
+            var list2: kotlin.collections.ArrayList<Float> = arrayListOf()
+
+            results = activityClassifier.predictProbability(data = list)
+
+            data?.toMutableList()?.clear()
+            ax.clear()
+            ay.clear()
+            az.clear()
+
+            gx.clear()
+            gy.clear()
+            gz.clear()
+
+            lx.clear()
+            ly.clear()
+            lz.clear()
+
+        }
+    }
+
+    private fun round(value: Float, decimal_places: Int): BigDecimal {
+        var bigDecimal: BigDecimal = BigDecimal(value.toString())
+        bigDecimal = bigDecimal.setScale(decimal_places, BigDecimal.ROUND_HALF_UP);
+        return bigDecimal
     }
 
 
@@ -274,6 +373,30 @@ class TrackingService: LifecycleService() {
             IMPORTANCE_LOW
         )
         notificationManager.createNotificationChannel(channel)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        var sensor = event?.sensor
+
+        if(sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+            event?.values?.get(0)?.let { ax.add(it) }
+            event?.values?.get(1)?.let { ay.add(it) }
+            event?.values?.get(2)?.let { az.add(it) }
+        }else if(sensor?.type == Sensor.TYPE_GYROSCOPE) {
+            event?.values?.get(0)?.let { gx.add(it) }
+            event?.values?.get(1)?.let { gy.add(it) }
+            event?.values?.get(2)?.let { gz.add(it) }
+        } else {
+            event?.values?.get(0)?.let { lx.add(it) }
+            event?.values?.get(1)?.let { ly.add(it) }
+            event?.values?.get(2)?.let { lz.add(it) }
+        }
+
+        predictActivity()
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        TODO("Not yet implemented")
     }
 
 

@@ -3,6 +3,7 @@ package com.example.dietjoggingapp.ui.viewmodels
 import androidx.lifecycle.*
 import com.example.dietjoggingapp.database.Jogging
 import com.example.dietjoggingapp.database.User
+import com.example.dietjoggingapp.database.domains.ListFoodSuggest
 import com.example.dietjoggingapp.other.SortType
 import com.example.dietjoggingapp.other.UiState
 import com.example.dietjoggingapp.repositories.JoggingRepo
@@ -34,6 +35,8 @@ class MainViewModel @Inject constructor(var joggingRepo: JoggingRepo): ViewModel
             _addJogging.value = it
         }
     }
+
+
 
 
     fun sortJogging(sortType: SortType) {

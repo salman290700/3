@@ -1,10 +1,7 @@
 package com.example.dietjoggingapp.di
 
 import android.content.SharedPreferences
-import com.example.dietjoggingapp.repositories.AuthRepo
-import com.example.dietjoggingapp.repositories.AuthRepoImp
-import com.example.dietjoggingapp.repositories.JoggingRepo
-import com.example.dietjoggingapp.repositories.JoggingRepoImp
+import com.example.dietjoggingapp.repositories.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.StorageReference
@@ -32,4 +29,8 @@ object RepoModule {
     ): AuthRepo {
         return AuthRepoImp(auth, database)
     }
+
+    @Provides
+    @Singleton
+    fun provideFoodSuggestRepo(): FoodSuggestRepo = FoodSuggestImpl()
 }

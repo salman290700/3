@@ -1,7 +1,12 @@
 package com.example.dietjoggingapp.ui.Fragments
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,10 +20,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.adapters.JoggingAdapter
 import com.example.dietjoggingapp.database.User
+import com.example.dietjoggingapp.database.domains.ActivityClassified
 import com.example.dietjoggingapp.databinding.FragmentJoggingBinding
 import com.example.dietjoggingapp.other.Constants.REQUEST_CODE_LOCATION_PERMISSION
 import com.example.dietjoggingapp.other.TrackingUtil
@@ -34,7 +39,7 @@ import pub.devrel.easypermissions.EasyPermissions
 
 private const val TAG = "JoggingFragment"
 @AndroidEntryPoint
-class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.PermissionCallbacks {
+class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.PermissionCallbacks{
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private var isFineLocation: Boolean = false
     private var isCoarseLocation: Boolean = false
@@ -49,6 +54,27 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
     private lateinit var user: User
     private lateinit var firebaseFirestore: FirebaseFirestore
 
+    private val TIME_STAMP = 100
+    private val TAG: String = "Jogging Fragment"
+    private lateinit var ax: MutableList<Float>
+    private lateinit var ay: MutableList<Float>
+    private lateinit var az: MutableList<Float>
+
+    private lateinit var gx: MutableList<Float>
+    private lateinit var gy: MutableList<Float>
+    private lateinit var gz: MutableList<Float>
+
+    private lateinit var lx: MutableList<Float>
+    private lateinit var ly: MutableList<Float>
+    private lateinit var lz: MutableList<Float>
+
+    private lateinit var sensorManager: SensorManager
+    private lateinit var mAccelerometer: Sensor
+    private lateinit var mGroScope: Sensor
+    private lateinit var mLinearAcceleration: Sensor
+
+    private var results = arrayListOf<Float>()
+    private lateinit  var activityClassifier: ActivityClassified
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -62,17 +88,17 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
         super.onCreate(savedInstanceState)
         firebaseFirestore = FirebaseFirestore.getInstance()
 
+
+
+
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
             permissionLauncher()
         }else {
             permissionLauncherVersionQLater()
         }
-
         requestPermission()
 
         joggingAdapter = JoggingAdapter()
-
-
 
 //        binding.spFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 //            override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -104,6 +130,8 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
 
 
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -119,6 +147,7 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
                 is UiState.Success -> {
                     binding.progressBar.hide()
                     joggingAdapter.submitList(state.data.toMutableList())
+
                     Log.d(TAG, "onViewCreated: ${state.data.toString().trim()}")
                 }
                 is UiState.failure -> {
