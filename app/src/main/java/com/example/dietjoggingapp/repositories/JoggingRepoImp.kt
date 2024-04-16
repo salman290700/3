@@ -60,7 +60,7 @@ class JoggingRepoImp(
                 Log.d("TAG", "addJogging: calories burned" + jogging.caloriesBurned)
 
                 result.invoke(
-                    UiState.Success(Pair(jogging, "Project has been Created..."))
+                    UiState.Success(Pair(jogging, "Jogging has been Added..."))
                 )
                 Log.d("TAG", "addJogging: " + it.toString())
             }

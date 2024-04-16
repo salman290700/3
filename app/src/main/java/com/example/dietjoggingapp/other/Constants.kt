@@ -32,11 +32,13 @@ object Constants {
         val PROJECT_PHOTO = "PROJECT_PHOTO"
         val PROJECT_COLLABORATION = "PROJECT_COLLABORATION"
         val JOGGING = "JOGGING"
+        val FOOD = "FOODS"
     }
 
     object FireStoreDocumentField{
         val DATE = "date"
         val USER_ID = "userId"
+
     }
 
     object sharedPreferences {
@@ -52,6 +54,7 @@ object Constants {
         val ROOT_DIRECTORY = "app"
         val PROJECT_ICON = "project_icon"
         val PROJECT_PHOTO = "project_photo"
+        val PROFILE_PHOTO = "profile_photo"
     }
 
 

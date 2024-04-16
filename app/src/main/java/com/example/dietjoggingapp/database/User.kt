@@ -17,5 +17,8 @@ data class User(
     val height: Float = 172.0f,
     val age: Float = 0.0f,
     val bmr: Float = 0.0f,
-    val gender: String = ""
+    val gender: String = "",
+    val birthDate: Int = 0,
+    val birthMonth: Int = 0,
+    val birthYear: Int = 0
 ): Parcelable

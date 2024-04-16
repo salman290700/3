@@ -33,4 +33,9 @@ object RepoModule {
     @Provides
     @Singleton
     fun provideFoodSuggestRepo(): FoodSuggestRepo = FoodSuggestImpl()
+
+    @Provides
+    @Singleton
+    fun provideFoodRepo(auth:
+    FirebaseAuth, database: FirebaseFirestore): FoodRepo = FoodImpl(auth, database)
 }

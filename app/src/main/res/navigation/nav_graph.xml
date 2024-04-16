@@ -73,22 +73,26 @@
         android:id="@+id/foodsFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.FoodSuggestFragment"
         android:label="CalorieFragment">
-
     </fragment>
-
     <fragment
         android:id="@+id/AccountFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.AccountFragment"
         android:label="AccountFragment"
         >
-        
     </fragment>
-
     <fragment
         android:id="@+id/AccountDetailFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.AccountDetailFragment"
         android:label="AccountDetailFragment"
         />
-
-
+    <fragment
+        android:id="@+id/EditFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.EditFragment"
+        android:label="EditFragment"
+        />
+    <fragment
+        android:id="@+id/FoodFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.FoodFragment"
+        android:label="FoodFragment"
+        />
 </navigation>

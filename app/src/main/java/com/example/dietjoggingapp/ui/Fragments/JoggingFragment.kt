@@ -87,10 +87,6 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firebaseFirestore = FirebaseFirestore.getInstance()
-
-
-
-
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
             permissionLauncher()
         }else {
@@ -119,22 +115,13 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
         val firebaseAuth = FirebaseAuth.getInstance().currentUser?.uid?.toString()?.trim()
         viewModel.getJogging(firebaseAuth.toString().trim())
 
-
-
 //        viewModel.joggingSortByDate.observe(viewLifecycleOwner, Observer {
 //            joggingAdapter.submitList(it)
 //        })
-
-
     }
-
-
-
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_joggingFragments_to_trackingFragment)
         }

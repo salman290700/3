@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
+import com.example.dietjoggingapp.database.DailyCalories
 import com.example.dietjoggingapp.database.Jogging
 import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.database.domains.ActiivtyClassified
@@ -32,6 +33,7 @@ import com.example.dietjoggingapp.other.TrackingUtil
 import com.example.dietjoggingapp.other.UiState
 import com.example.dietjoggingapp.services.Polyline
 import com.example.dietjoggingapp.services.TrackingService
+import com.example.dietjoggingapp.ui.MainActivity
 import com.example.dietjoggingapp.ui.viewmodels.MainViewModel
 import com.example.dietjoggingapp.utility.hide
 import com.example.dietjoggingapp.utility.show
@@ -191,7 +193,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
                 bounds.include(pos)
             }
         }
-
         map?.moveCamera(
             CameraUpdateFactory.newLatLngBounds(
                 bounds.build(),
@@ -235,6 +236,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
     }
 
     private fun getJogging(){
+        val auth = FirebaseAuth.getInstance().currentUser
         var simpleDateFormat = SimpleDateFormat("yyyyMMddHHmmSS", Locale.TAIWAN)
         var filename = simpleDateFormat.format(Date())
         var path = activity?.applicationContext?.filesDir?.path
@@ -265,6 +267,24 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
             this.caloriesBurned = caloriesBurned
             this.avgSpeed = avgSpeed
             this.bitmap =""
+            val documentDaillyCalorie = database.collection("DAILYCALORIE").document(auth!!.uid)
+            var dailyCalories = DailyCalories()
+            var calorie = 0f
+            documentDaillyCalorie.get().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val documentSnapshot = it.result
+                    dailyCalories = documentSnapshot.toObject(DailyCalories::class.java)!!
+                    calorie = dailyCalories.calorie - caloriesBurned
+                    dailyCalories.calorie = calorie
+                    documentDaillyCalorie.update("calorie", dailyCalories.calorie).addOnCompleteListener {
+
+                    }.addOnFailureListener {
+                        Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
+                    }
+                }
+            }.addOnFailureListener {
+                Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
+            }
             fOut.flush()
             fOut.close()
 
@@ -453,10 +473,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
     override fun onSensorChanged(event: SensorEvent?) {
 
     }
-
-
-    
-
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         TODO("Not yet implemented")

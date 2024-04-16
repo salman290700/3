@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/_8sdp"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <ImageView
+        android:layout_marginTop="@dimen/_20sdp"
+        android:id="@+id/ivFoodSuggestImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    <LinearLayout
+        android:id="@+id/layoutText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+        <TextView
+            android:id="@+id/tvNamgeOfFood"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="name of food"
+            android:textStyle="bold"
+            android:textSize="@dimen/_16ssp"
+            android:textAlignment="textStart"
+            android:textColor="@color/white"
+            />
+
+        <TextView
+            android:layout_marginTop="@dimen/_4sdp"
+            android:id="@+id/tvFoodCalorie"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Food Calorie"
+            android:textStyle="bold"
+            android:textSize="@dimen/_12ssp"
+            android:textAlignment="textStart"
+            android:textColor="@color/white"
+            />
+        <TextView
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvDescription"
+            android:textSize="@dimen/_12ssp"
+            android:text="Description"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+
+</LinearLayout>

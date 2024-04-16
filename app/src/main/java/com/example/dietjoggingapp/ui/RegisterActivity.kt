@@ -1,5 +1,6 @@
 package com.example.dietjoggingapp.ui
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.StorageReference
+import java.text.SimpleDateFormat
 
 class RegisterActivity : AppCompatActivity() {
     private var auth = FirebaseAuth.getInstance()
@@ -35,7 +37,9 @@ class RegisterActivity : AppCompatActivity() {
         }
 
 //        Setup tvLogin
-        binding
+        binding.addPicture.setOnClickListener {
+
+        }
     }
 
     private fun registerUser(email: String, password: String, user: User){ //result: (UiState<String>) -> Unit) {
@@ -68,9 +72,30 @@ class RegisterActivity : AppCompatActivity() {
             if(checkedId == R.id.rbMale) {
                 gender = "Male"
             } else {
-                gender = "female"
+                gender = "Female"
             }
         }
+
+
+
+        val current_date = SimpleDateFormat("dd").format(System.currentTimeMillis()).toInt()
+        val current_month = SimpleDateFormat("MM").format(System.currentTimeMillis()).toInt()
+        val current_year = SimpleDateFormat("yyy").format(System.currentTimeMillis()).toInt()
+
+        val ageDay: Int
+        val ageMonth: Int
+        val ageYear: Int
+
+        val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->  },
+            current_year, current_month, current_date)
+        binding.etBirthDate.setOnClickListener {
+            datePickerDialog.show()
+        }
+
+        ageDay = datePickerDialog.datePicker.dayOfMonth
+        ageMonth = datePickerDialog.datePicker.month
+        ageYear = datePickerDialog.datePicker.year
+
         return User(
             userId = "",
             fullName = name,
@@ -80,7 +105,10 @@ class RegisterActivity : AppCompatActivity() {
             weight = weight,
             height = height,
             age = age,
-            gender = gender
+            gender = gender,
+            birthDate = ageDay,
+            birthMonth = ageMonth,
+            birthYear = ageYear,
         )
     }
 

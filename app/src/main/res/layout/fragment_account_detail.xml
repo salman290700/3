@@ -19,6 +19,21 @@
            app:layout_constraintTop_toTopOf="parent"
            android:layout_marginTop="@dimen/_32sdp"
            android:background="@drawable/img_profile"
+           android:clickable="true"
+           />
+       <com.google.android.material.floatingactionbutton.FloatingActionButton
+           android:id="@+id/floatingActionButton"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:background="@drawable/custom_style_blue"
+           android:clickable="true"
+           app:srcCompat="@drawable/ic_baseline_camera_alt_24"
+           app:layout_constraintBottom_toBottomOf="@id/img_profile"
+           app:layout_constraintTop_toTopOf="@id/img_profile"
+           app:layout_constraintStart_toStartOf="@id/img_profile"
+           app:layout_constraintEnd_toEndOf="@id/img_profile"
+           android:layout_marginTop="160dp"
+           android:layout_marginStart="220dp"
            />
        <TextView
            android:id="@+id/tv_email"
@@ -155,6 +170,7 @@
                         <TableRow
                             android:layout_marginTop="@dimen/_8sdp">
                             <TextView
+                                android:id="@+id/tv_weight"
                                 android:layout_width="wrap_content"
                                 android:layout_height="@dimen/_14sdp"
                                 android:textSize="@dimen/_12sdp"
@@ -166,6 +182,7 @@
                         <TableRow
                             android:layout_marginTop="@dimen/_8sdp">
                             <TextView
+                                android:id="@+id/tv_calorie"
                                 android:layout_width="wrap_content"
                                 android:layout_height="@dimen/_14sdp"
                                 android:textSize="@dimen/_12sdp"
@@ -176,6 +193,7 @@
                         <TableRow
                             android:layout_marginTop="@dimen/_8sdp">
                             <TextView
+                                android:id="@+id/tv_tallInCm"
                                 android:layout_width="wrap_content"
                                 android:layout_height="@dimen/_14sdp"
                                 android:textSize="@dimen/_12sdp"
