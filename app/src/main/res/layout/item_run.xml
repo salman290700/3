@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:padding="@dimen/_8sdp">
     <ImageView
         android:id="@+id/ivRunImage"
@@ -31,14 +32,16 @@
             android:layout_marginTop="@dimen/_2sdp"
             android:orientation="horizontal">
             <TextView
-                android:layout_width="@dimen/_72sdp"
+                android:layout_width="@dimen/_96sdp"
                 android:layout_height="wrap_content"
-                android:text="Date : "/>
+                android:text="Date : "
+                android:textColor="@color/white"/>
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date"
+                android:textColor="@color/white"
                 />
         </LinearLayout>
 
@@ -49,15 +52,18 @@
             android:layout_marginHorizontal="@dimen/_20sdp"
             android:layout_marginTop="@dimen/_2sdp"
             android:orientation="horizontal">
+
             <TextView
-                android:layout_width="@dimen/_72sdp"
-                android:layout_height="wrap_content"
-                android:text="Time : "/>
+                android:layout_width="@dimen/_96sdp"
+                android:layout_height="match_parent"
+                android:text="Time : "
+                android:textColor="@color/white" />
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date"
+                android:textColor="@color/white"
                 />
         </LinearLayout>
 
@@ -69,14 +75,17 @@
             android:layout_marginTop="@dimen/_2sdp"
             android:orientation="horizontal">
             <TextView
-                android:layout_width="@dimen/_72sdp"
+                android:layout_width="@dimen/_96sdp"
                 android:layout_height="wrap_content"
-                android:text="Time : "/>
+                android:text="Distance : "
+                android:textColor="@color/white"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvDistance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Date"
+                android:text="Distance"
+                android:textColor="@color/white"
                 />
         </LinearLayout>
 
@@ -88,14 +97,17 @@
             android:layout_marginTop="@dimen/_2sdp"
             android:orientation="horizontal">
             <TextView
-                android:layout_width="@dimen/_72sdp"
+                android:layout_width="@dimen/_96sdp"
                 android:layout_height="wrap_content"
-                android:text="Avg. Speed : "/>
+                android:text="Avg. Speed : "
+                android:textColor="@color/white"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvAvgSpeed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date"
+                android:textColor="@color/white"
                 />
         </LinearLayout>
 
@@ -107,14 +119,17 @@
             android:layout_marginTop="@dimen/_2sdp"
             android:orientation="horizontal">
             <TextView
-                android:layout_width="@dimen/_72sdp"
+                android:layout_width="@dimen/_96sdp"
                 android:layout_height="wrap_content"
-                android:text="Avg. Speed : "/>
+                android:text="Calories BUrned: "
+                android:textColor="@color/white"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvCalories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Date"
+                android:textColor="@color/white"
                 />
         </LinearLayout>
     </LinearLayout>

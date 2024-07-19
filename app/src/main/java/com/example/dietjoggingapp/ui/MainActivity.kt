@@ -32,10 +32,9 @@ class MainActivity : AppCompatActivity() {
 //    lateinit var joggingDAO: JoggingDAO
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loginFirst()
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        loginFirst()
 //    Fragment Transaction
         val fragmentManager: FragmentManager = supportFragmentManager
         val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
@@ -44,15 +43,13 @@ class MainActivity : AppCompatActivity() {
         bundle.putString("EXTRA_USER_SESSION", sessionId)
         trackingFragment.arguments = bundle
         val navView: BottomNavigationView = binding.navView
-        navigateTrackingFragmentIfNeeded(intent)
         val navHostController = findNavController(R.id.nav_host_fragment_activity_bottom_navigation)
 
         val appBar = AppBarConfiguration(
             setOf(
-                R.id.joggingsFragment, R.id.foodsFragment, R.id.AccountFragment
+                R.id.HomeFragment, R.id.joggingsFragment, R.id.FoodSuggestFragment, R.id.AccountFragment
             )
         )
-
     setupActionBarWithNavController(navHostController, appBar)
     navView.setupWithNavController(navHostController)
 //        Test Inject JoggingDAO
@@ -75,5 +72,35 @@ class MainActivity : AppCompatActivity() {
         if(intent?.action == ACTION_SHOW_TRACKING_FRAGMENT) {
             navHostController.navigate(R.id.action_global_trackingFragment)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val navView: BottomNavigationView = binding.navView
+        navigateTrackingFragmentIfNeeded(intent)
+        val navHostController = findNavController(R.id.nav_host_fragment_activity_bottom_navigation)
+
+        val appBar = AppBarConfiguration(
+            setOf(
+                R.id.action_home, R.id.joggingsFragment, R.id.FoodSuggestFragment, R.id.AccountFragment
+            )
+        )
+        setupActionBarWithNavController(navHostController, appBar)
+        navView.setupWithNavController(navHostController)
+    }
+
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        val navView: BottomNavigationView = binding.navView
+        navigateTrackingFragmentIfNeeded(intent)
+        val navHostController = findNavController(R.id.nav_host_fragment_activity_bottom_navigation)
+
+        val appBar = AppBarConfiguration(
+            setOf(
+                R.id.action_home, R.id.joggingsFragment, R.id.FoodSuggestFragment, R.id.AccountFragment
+            )
+        )
+        setupActionBarWithNavController(navHostController, appBar)
+        navView.setupWithNavController(navHostController)
     }
 }

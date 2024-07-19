@@ -1,253 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.Fragments.EditFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ImageView
-            android:id="@+id/img_profile"
-            android:src="@drawable/ic_baseline_emoji_food_beverage_24"
-            android:layout_width="@dimen/_48sdp"
-            android:layout_height="@dimen/_48sdp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="@dimen/_32sdp"
-            android:background="@drawable/img_profile"
-            android:clickable="true"
-            />
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/custom_style_blue"
-            android:clickable="true"
-            app:srcCompat="@drawable/ic_baseline_camera_alt_24"
-            app:layout_constraintBottom_toBottomOf="@id/img_profile"
-            app:layout_constraintTop_toTopOf="@id/img_profile"
-            app:layout_constraintStart_toStartOf="@id/img_profile"
-            app:layout_constraintEnd_toEndOf="@id/img_profile"
-            android:layout_marginTop="160dp"
-            android:layout_marginStart="220dp"
-            />
-        <TextView
-            android:id="@+id/tv_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="YourEmail@email.com"
-            android:textAlignment="center"
-            android:textColor="@color/md_blue_50"
-            android:textSize="@dimen/_12sdp"
-            android:layout_marginTop="@dimen/_8sdp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/img_profile"
-            />
+    <!-- TODO: Update blank fragment layout -->
 
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="YourName"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="@dimen/_14sdp"
-            android:layout_marginTop="@dimen/_8sdp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_email"
-            />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="-16dp"
+        tools:layout_editor_absoluteY="-131dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_name"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
 
-            >
-            <LinearLayout
+            <ImageView
+                android:id="@+id/addPicture"
+                android:layout_width="@dimen/_72sdp"
+                android:layout_height="@dimen/_72sdp"
+                android:layout_marginTop="@dimen/_32sdp"
+                android:layout_marginBottom="@dimen/_24sdp"
+                android:src="@drawable/ic_baseline_person_24" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/emailLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_name"
-                android:layout_marginTop="@dimen/_12sdp"
-                >
-                <TableLayout
-                    android:layout_width="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_12sdp"
-                    android:layout_marginEnd="@dimen/_12sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginBottom="@dimen/_8sdp">
-                    <TableRow
-                        android:layout_marginTop="@dimen/_8sdp">
-                        <TextView
-                            android:layout_width="@dimen/_72sdp"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text="Berat Badan"/>
-                    </TableRow>
-                    <TableRow
-                        android:layout_marginTop="@dimen/_12sdp">
-                        <TextView
-                            android:layout_width="@dimen/_100sdp"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text="Tinggi Badan"/>
-                    </TableRow>
+                    android:background="@color/white"
+                    android:hint="Enter your Email Address"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/black" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <TableRow
-                        android:layout_marginTop="@dimen/_12sdp">
-                        <TextView
-                            android:layout_width="@dimen/_100sdp"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text="Tanggal Lahir"/>
-                    </TableRow>
-                </TableLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nameLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
 
-                <TableLayout
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_4sdp"
-                    android:layout_marginEnd="@dimen/_4sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginBottom="@dimen/_8sdp">
-                    <TableRow
-                        android:layout_marginTop="@dimen/_8sdp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text=":"/>
-                    </TableRow>
-                    <TableRow
-                        android:layout_marginTop="@dimen/_12sdp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text=":"/>
-                    </TableRow>
+                    android:background="@color/white"
+                    android:hint="Enter your Name"
+                    android:inputType="textPersonName"
+                    android:textColor="@color/black" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <TableRow
-                        android:layout_marginTop="@dimen/_12sdp">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text=":"
-                            android:textAlignment="textStart"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/_12sdp" />
-                    </TableRow>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/weightLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
 
-                </TableLayout>
-
-                <TableLayout
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etWeight"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_4sdp"
-                    android:layout_marginEnd="@dimen/_4sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginBottom="@dimen/_8sdp">
-                    <TableRow
-                        android:layout_marginTop="@dimen/_8sdp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_weight"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textEmailAddress"
-                            android:text="68 Kg"
-                            android:background="@color/white"
-                            android:textColor="@color/black"
-                            />
-                    </TableRow>
-                    <TableRow
-                        android:layout_marginTop="@dimen/_8sdp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_height"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textEmailAddress"
-                            android:text="68 Kg"
-                            android:background="@color/white"
-                            android:textColor="@color/black"
-                            />
-                    </TableRow>
+                    android:background="@color/white"
+                    android:hint="Enter your Weight in Kg"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/black"
 
-                    <TableRow
-                        android:layout_marginTop="@dimen/_8sdp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_birthDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textEmailAddress"
-                            android:text="29-07-2000"
-                            android:background="@color/white"
-                            android:textColor="@color/black"
-                            />
-                    </TableRow>
-                </TableLayout>
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <TableLayout
-                    android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/whightLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etHeight"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_4sdp"
-                    android:layout_marginEnd="@dimen/_4sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginBottom="@dimen/_8sdp">
-                    <TableRow
-                        android:layout_marginTop="@dimen/_8sdp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text="Kg"/>
-                    </TableRow>
-                    <TableRow
-                        android:layout_marginTop="@dimen/_12sdp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="@dimen/_14sdp"
-                            android:textSize="@dimen/_12sdp"
-                            android:textColor="@color/white"
-                            android:textAlignment="textStart"
-                            android:text="Cm"/>
-                    </TableRow>
-                </TableLayout>
-            </LinearLayout>
+                    android:background="@color/white"
+                    android:hint="Enter your Height in Cm"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/black" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ageLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:hint="Enter your age (in year)"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/black"
+
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/genderLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Gender"
+                    android:textSize="@dimen/_16ssp" />
+
+                <RadioGroup
+                    android:id="@+id/rgGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/rbMale"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Male" />
+
+                    <RadioButton
+                        android:id="@+id/rbFemale"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Female" />
+                </RadioGroup>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/birthDateLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/_4sdp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etBirthDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:hint="Enter your Birthdate"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/black" >
+                </com.google.android.material.textfield.TextInputEditText>
+            </com.google.android.material.textfield.TextInputLayout>
+
             <Button
-                android:layout_marginTop="@dimen/_8sdp"
+                android:id="@+id/save"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16sdp"
-                android:background="@drawable/btn_background_edit_profile"
-                android:text="Save Profile"
-                android:textColor="@color/white"
-                android:id="@+id/btn_save_profile"
-                />
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="Save" />
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
-</FrameLayout>
+    <ProgressBar
+        android:layout_width="@dimen/_32sdp"
+        android:layout_height="@dimen/_32sdp"
+        android:id="@+id/progress_circular"
+        android:layout_gravity="center"
+        android:foregroundGravity="center_horizontal"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

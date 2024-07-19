@@ -1,12 +1,12 @@
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-    id 'kotlin-kapt'
-    id 'com.google.dagger.hilt.android'
-    id 'com.google.gms.google-services'
-    id 'kotlin-parcelize'
-}
+    plugins {
+        id 'com.android.application'
+        id 'org.jetbrains.kotlin.android'
+        id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+        id 'kotlin-kapt'
+        id 'com.google.dagger.hilt.android'
+        id 'com.google.gms.google-services'
+        id 'kotlin-parcelize'
+    }
 
 android {
     namespace 'com.example.dietjoggingapp'
@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.dietjoggingapp"
-        minSdk 21
+        minSdk 26
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -50,18 +50,16 @@ android {
 }
 
 dependencies {
-
-
-
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'com.android.volley:volley:1.2.1'
 
     implementation 'com.squareup.picasso:picasso:2.8'
+    implementation 'com.google.mlkit:translate:17.0.2'
+
 
 //    Google Maps Service
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
-
 
 //    EasyPermission TIdak Dipakai dan akan menggunakan permissionLauncher biasa
     implementation 'pub.devrel:easypermissions:3.0.0'
@@ -169,3 +167,5 @@ dependencies {
 kapt {
     correctErrorTypes true
 }
+
+

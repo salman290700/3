@@ -22,21 +22,29 @@ class JoggingRepoImp(
     private val storageReference:StorageReference
 ): JoggingRepo {
     override fun getJoggings(userId: String, result: (UiState<List<Jogging>>) -> Unit) {
+        var projects = arrayListOf<Jogging>()
         database.collection(Constants.FirestoreTable.JOGGING)
             .whereEqualTo(Constants.FireStoreDocumentField.USER_ID, userId)
             .orderBy("date", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener {
-                val projects = arrayListOf<Jogging>()
+
                 Log.d("TAG", "getProjects: " + userId.trim())
                 for (document in it){
-                    val project = document.toObject(Jogging::class.java)
+                    var project = document.toObject(Jogging::class.java)
                     projects.add(project)
                     Log.d("TAG", "getJoggings: ${project.toString().trim()}")
                 }
-                result.invoke(
-                    UiState.Success(projects)
-                )
+                if(it.isEmpty) {
+                    result.invoke(
+                        UiState.failure("Data tidak ditemukan".toString())
+                    )
+                }else {
+                    result.invoke(
+                        UiState.Success(projects)
+                    )
+                }
+
                 Log.d("TAG", "getProjects: ${userId.trim()}")
             }
             .addOnFailureListener{

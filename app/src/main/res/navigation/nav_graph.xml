@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/joggingsFragment">
+    app:startDestination="@id/HomeFragment">
     <action android:id="@+id/action_global_trackingFragment"
         app:destination="@id/trackingFragment"
+        app:launchSingleTop="true"
+        />
+    <action android:id="@+id/action_global_homeFragment"
+        app:destination="@id/trackingFragment"
+        app:launchSingleTop="true"
+        />
+    <action android:id="@+id/action_home"
+        app:destination="@+id/HomeFragment"
         app:launchSingleTop="true"
         />
     <fragment
         android:id="@+id/joggingsFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.JoggingFragment"
-        android:label="JoggingsFragments" >
+        android:label="JoggingsFragments">
         <action
             android:id="@+id/action_joggingFragments_to_settingsFragment"
             app:destination="@id/settingsFragment" />
-        <action android:id="@+id/action_joggingFragments_to_statisticsFragment"
-            app:destination="@id/statisticsFragment"/>
         <action android:id="@+id/action_joggingFragments_to_trackingFragment"
             app:destination="@id/trackingFragment"/>
     </fragment>
@@ -26,6 +33,10 @@
         <action
             android:id="@+id/action_setUpFragment_to_joggingFragments"
             app:destination="@id/joggingsFragment" />
+        <action android:id="@+id/action_global_trackingFragment"
+            app:destination="@id/trackingFragment"
+            app:launchSingleTop="true"
+            />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -45,6 +56,8 @@
         android:label="TrackingFragment">
         <action android:id="@+id/action_tracking_fragment_to_jogging_fragment"
             app:destination="@id/joggingsFragment"/>
+        <action android:id="@+id/action_tracking_fragment_to_home_fragment"
+            app:destination="@id/HomeFragment"/>
     </fragment>
 
     <fragment
@@ -70,7 +83,7 @@
             />
     </fragment>
     <fragment
-        android:id="@+id/foodsFragment"
+        android:id="@+id/FoodSuggestFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.FoodSuggestFragment"
         android:label="CalorieFragment">
     </fragment>
@@ -85,14 +98,28 @@
         android:name="com.example.dietjoggingapp.ui.Fragments.AccountDetailFragment"
         android:label="AccountDetailFragment"
         />
+    <action android:id="@+id/action_to_AccountDetailFragment"
+        app:destination="@id/AccountDetailFragment"/>
+
     <fragment
         android:id="@+id/EditFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.EditFragment"
         android:label="EditFragment"
         />
+    <action android:id="@+id/action_to_editFragment"
+        app:destination="@id/EditFragment"/>
     <fragment
         android:id="@+id/FoodFragment"
         android:name="com.example.dietjoggingapp.ui.Fragments.FoodFragment"
         android:label="FoodFragment"
         />
+    <fragment
+        android:id="@+id/HomeFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.HomeFragment"
+        android:label="HomeFragment"
+        tools:layout="@layout/fragment_home"
+        >
+        <action android:id="@+id/action_homeFragment_to_trackingFragment"
+            app:destination="@id/trackingFragment"/>
+    </fragment>
 </navigation>

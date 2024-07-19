@@ -105,7 +105,7 @@
                                 android:textSize="@dimen/_12sdp"
                                 android:textColor="@color/white"
                                 android:textAlignment="textStart"
-                                android:text="Kebutuhan Kalori"/>
+                                android:text="Tanggal Lahir"/>
                         </TableRow>
 
                         <TableRow
@@ -118,6 +118,26 @@
                                 android:textAlignment="textStart"
                                 android:text="Tinggi Badan"/>
                         </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:layout_width="@dimen/_100sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text="Usia"/>
+                        </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:layout_width="@dimen/_100sdp"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text="Jenis Kelamin"/>
+                        </TableRow>
                     </TableLayout>
 
                     <TableLayout
@@ -127,6 +147,27 @@
                         android:layout_marginEnd="@dimen/_4sdp"
                         android:layout_marginTop="@dimen/_8sdp"
                         android:layout_marginBottom="@dimen/_8sdp">
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text=":"/>
+                        </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text=":"/>
+                        </TableRow>
+
                         <TableRow
                             android:layout_marginTop="@dimen/_8sdp">
                             <TextView
@@ -182,7 +223,7 @@
                         <TableRow
                             android:layout_marginTop="@dimen/_8sdp">
                             <TextView
-                                android:id="@+id/tv_calorie"
+                                android:id="@+id/tvbirthdate"
                                 android:layout_width="wrap_content"
                                 android:layout_height="@dimen/_14sdp"
                                 android:textSize="@dimen/_12sdp"
@@ -200,6 +241,28 @@
                                 android:textColor="@color/white"
                                 android:textAlignment="textStart"
                                 android:text="170"/>
+                        </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:id="@+id/tvage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text="23"/>
+                        </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:id="@+id/tvgender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text="laki-laki"/>
                         </TableRow>
                     </TableLayout>
 
@@ -228,7 +291,7 @@
                                 android:textSize="@dimen/_12sdp"
                                 android:textColor="@color/white"
                                 android:textAlignment="textStart"
-                                android:text="Kcal"/>
+                                android:text=""/>
                         </TableRow>
                         <TableRow
                             android:layout_marginTop="@dimen/_8sdp">
@@ -239,6 +302,26 @@
                                 android:textColor="@color/white"
                                 android:textAlignment="textStart"
                                 android:text="CM"/>
+                        </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text="Tahun"/>
+                        </TableRow>
+                        <TableRow
+                            android:layout_marginTop="@dimen/_8sdp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="@dimen/_14sdp"
+                                android:textSize="@dimen/_12sdp"
+                                android:textColor="@color/white"
+                                android:textAlignment="textStart"
+                                android:text=""/>
                         </TableRow>
                     </TableLayout>
                 </LinearLayout>

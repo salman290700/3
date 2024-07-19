@@ -26,7 +26,9 @@ class JoggingAdapter(): RecyclerView.Adapter<JoggingAdapter.JoggingViewHolder>()
             val requestOption = RequestOptions()
             requestOption.placeholder(R.drawable.ic_baseline_delete_24)
             requestOption.error(R.drawable.ic_baseline_delete_24)
-            Picasso.get().load(item.img).into(binding.ivRunImage)
+            if (item.img != "" || item.img != null) {
+                Picasso.get().load(item.img).into(binding.ivRunImage)
+            }
             Log.d("TAG", "bind: ${item.img}")
             val calendar = Calendar.getInstance().apply {
                 timeInMillis = item.timeInMillis
@@ -61,7 +63,9 @@ class JoggingAdapter(): RecyclerView.Adapter<JoggingAdapter.JoggingViewHolder>()
 
     override fun onBindViewHolder(holder: JoggingViewHolder, position: Int) {
         val item = list[position]
-        holder.bind(item)
+        if (item!= null) {
+            holder.bind(item)
+        }
     }
 
     override fun getItemCount(): Int {

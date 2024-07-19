@@ -17,6 +17,7 @@ import android.location.Location
 import android.location.LocationRequest
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
@@ -109,7 +110,7 @@ class TrackingService: LifecycleService(), SensorEventListener {
         pathPoints.postValue(mutableListOf())
         timingRunInMillis.postValue(0L)
         timingRungInSeconds.postValue(0L)
-        isStart.postValue((round(results?.get(2)!!.toFloat(), 2)))
+//        isStart.postValue((round(results!!.get(2)!!.toFloat(), 2)))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -164,45 +165,45 @@ class TrackingService: LifecycleService(), SensorEventListener {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun predictActivity() {
-        var data = java.util.ArrayList<Float>()
-
-        if(ax.size >= TIME_STAMP && ay.size >= TIME_STAMP && az.size >= TIME_STAMP &&
-            gx.size >= TIME_STAMP && gy.size >= TIME_STAMP && gz.size >= TIME_STAMP &&
-            lx.size >= TIME_STAMP && ly.size >= TIME_STAMP && lz.size >= TIME_STAMP
-        ) {
-
-            data.addAll(ax.subList(0, TIME_STAMP))
-            data.addAll(ay.subList(0, TIME_STAMP))
-            data.addAll(az.subList(0, TIME_STAMP))
-
-            data.addAll(gx.subList(0, TIME_STAMP))
-            data.addAll(gy.subList(0, TIME_STAMP))
-            data.addAll(gz.subList(0, TIME_STAMP))
-
-            data.addAll(lx.subList(0, TIME_STAMP))
-            data.addAll(ly.subList(0, TIME_STAMP))
-            data.addAll(lz.subList(0, TIME_STAMP))
-            val list= data.toFloatArray()
-            var list2: kotlin.collections.ArrayList<Float> = arrayListOf()
-
-            results = activityClassifier.predictProbability(data = list)
-
-            data?.toMutableList()?.clear()
-            ax.clear()
-            ay.clear()
-            az.clear()
-
-            gx.clear()
-            gy.clear()
-            gz.clear()
-
-            lx.clear()
-            ly.clear()
-            lz.clear()
-
-        }
-    }
+//    private fun predictActivity() {
+//        var data = java.util.ArrayList<Float>()
+//
+//        if(ax.size >= TIME_STAMP && ay.size >= TIME_STAMP && az.size >= TIME_STAMP &&
+//            gx.size >= TIME_STAMP && gy.size >= TIME_STAMP && gz.size >= TIME_STAMP &&
+//            lx.size >= TIME_STAMP && ly.size >= TIME_STAMP && lz.size >= TIME_STAMP
+//        ) {
+//
+//            data.addAll(ax.subList(0, TIME_STAMP))
+//            data.addAll(ay.subList(0, TIME_STAMP))
+//            data.addAll(az.subList(0, TIME_STAMP))
+//
+//            data.addAll(gx.subList(0, TIME_STAMP))
+//            data.addAll(gy.subList(0, TIME_STAMP))
+//            data.addAll(gz.subList(0, TIME_STAMP))
+//
+//            data.addAll(lx.subList(0, TIME_STAMP))
+//            data.addAll(ly.subList(0, TIME_STAMP))
+//            data.addAll(lz.subList(0, TIME_STAMP))
+//            val list= data.toFloatArray()
+//            var list2: kotlin.collections.ArrayList<Float> = arrayListOf()
+//
+//            results = activityClassifier.predictProbability(data = list)
+//
+//            data?.toMutableList()?.clear()
+//            ax.clear()
+//            ay.clear()
+//            az.clear()
+//
+//            gx.clear()
+//            gy.clear()
+//            gz.clear()
+//
+//            lx.clear()
+//            ly.clear()
+//            lz.clear()
+//
+//        }
+//    }
 
     private fun round(value: Float, decimal_places: Int): BigDecimal {
         var bigDecimal: BigDecimal = BigDecimal(value.toString())
@@ -268,10 +269,16 @@ class TrackingService: LifecycleService(), SensorEventListener {
     private fun addPathPoint(location: Location) {
         location?.let {
             val pos = LatLng(location.latitude, location.longitude)
-            pathPoints.value?.apply {
-                last().add(pos)
-                pathPoints.postValue(this)
+            Log.d(TAG, "addPathPoint: ${pos.toString().trim()}")
+            if(pos != null) {
+                pathPoints.value?.apply {
+                    last().add(pos)
+                    pathPoints.postValue(this)
+                }
+            }else {
+                Log.d(TAG, "addPathPoint: null pathpoints")
             }
+            
         }
     }
 
@@ -343,8 +350,6 @@ class TrackingService: LifecycleService(), SensorEventListener {
         }
     }
 
-
-
     private fun startForegroundService() {
         startTimer()
         isTracking.postValue(true)
@@ -392,12 +397,14 @@ class TrackingService: LifecycleService(), SensorEventListener {
             event?.values?.get(2)?.let { lz.add(it) }
         }
 
-        predictActivity()
+//        predictActivity()
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        TODO("Not yet implemented")
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int){
+
     }
 
+   fun dsada() {
 
+    }
 }

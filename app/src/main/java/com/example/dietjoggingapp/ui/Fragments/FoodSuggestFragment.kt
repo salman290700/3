@@ -10,6 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.adapters.FoodSuggestAdapter
+import com.example.dietjoggingapp.database.Ingredients
+import com.example.dietjoggingapp.database.domains.FoodSuggest
+import com.example.dietjoggingapp.database.foodsugser
 import com.example.dietjoggingapp.databinding.FragmentFoodSuggestBinding
 import com.example.dietjoggingapp.other.UiState
 import com.example.dietjoggingapp.ui.viewmodels.FoodSuggestViewModel
@@ -17,11 +20,12 @@ import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest) {
+class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest), FoodSuggestAdapter.RecyclerViewClickListener {
     private lateinit var binding: FragmentFoodSuggestBinding
     private val viewModel: FoodSuggestViewModel by viewModels()
     private lateinit var foodSuggestadapter: FoodSuggestAdapter
     private val TAG: String = "Food Suggest Fragment"
+
 
 
     override fun onCreateView(
@@ -36,6 +40,8 @@ class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         foodSuggestadapter = FoodSuggestAdapter()
+
+
 
         Log.d("TAG", "onCreate: Create Food Page")
     }
@@ -63,7 +69,22 @@ class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest) {
             }
         })
 
-
+        foodSuggestadapter.listener = this
     }
 
+    override fun onItemClicked(view: View, foodSuggest: FoodSuggest) {
+        val name = foodSuggest.name
+        val desc = foodSuggest.description
+        val image = foodSuggest.image
+        var ingredients = mutableListOf<Ingredients>()
+
+        for (i in 0..foodSuggest.ingredients.size) {
+            var ingredient = Ingredients(foodSuggest.ingredients.get(i).name, foodSuggest.ingredients.get(i).servingSize.grams)
+            ingredients.add(i, ingredient)
+        }
+
+        val foodSuggestSer = foodsugser(foodSuggest.id, name, desc, foodSuggest.tags, foodSuggest.steps, image, ingredients)
+        val bundle = Bundle()
+        bundle.putParcelable("foodSuggest", foodSuggestSer)
+    }
 }

@@ -7,6 +7,9 @@ import javax.annotation.processing.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import kotlinx.parcelize.Parcelize;
+
+@Parcelize
 @Generated("jsonschema2pojo")
 public class FoodSuggest {
 
@@ -142,5 +145,4 @@ public class FoodSuggest {
     public void setImage(String image) {
         this.image = image;
     }
-
 }

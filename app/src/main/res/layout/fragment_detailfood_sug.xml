@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.Fragments.DetailfoodSugFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tvfoodname"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="name"
+            android:textColor="@color/white"
+            />
+        <ImageView
+            android:id="@+id/ivFoodSuggestImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+        <TextView
+            android:id="@+id/tvfooddesc"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="desc"
+            android:textColor="@color/white"
+            />
+        <TextView
+            android:id="@+id/tvfoodIngredients"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Steps"
+            android:textColor="@color/white"
+            />
+        <TextView
+            android:id="@+id/tvfoodSteps"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Steps"
+            android:textColor="@color/white"
+            />
+    </LinearLayout>
+
+
+</FrameLayout>

@@ -19,7 +19,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.adapters.JoggingAdapter
 import com.example.dietjoggingapp.database.User
@@ -31,6 +35,8 @@ import com.example.dietjoggingapp.other.UiState
 import com.example.dietjoggingapp.ui.viewmodels.MainViewModel
 import com.example.dietjoggingapp.utility.hide
 import com.example.dietjoggingapp.utility.show
+import com.example.dietjoggingapp.utility.toast
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,9 +99,8 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
             permissionLauncherVersionQLater()
         }
         requestPermission()
-
+        Log.d("TAG", "onCreate: ${requireActivity().toString().trim()}")
         joggingAdapter = JoggingAdapter()
-
 //        binding.spFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 //            override fun onNothingSelected(p0: AdapterView<*>?) {
 //
@@ -133,18 +138,19 @@ class JoggingFragment: Fragment(R.layout.fragment_jogging), EasyPermissions.Perm
                 }
                 is UiState.Success -> {
                     binding.progressBar.hide()
-                    joggingAdapter.submitList(state.data.toMutableList())
+                    if (state.data.toMutableList() != null) {
+                        joggingAdapter.submitList(state.data.toMutableList())
+                    }
 
                     Log.d(TAG, "onViewCreated: ${state.data.toString().trim()}")
                 }
                 is UiState.failure -> {
+                    toast(state.error)
                     binding.progressBar.hide()
                 }
             }
         })
     }
-
-
 
     private fun requestPermissions() {
         if (TrackingUtil.locationPermissions(requireContext())) {

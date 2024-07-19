@@ -1,16 +1,22 @@
 package com.example.dietjoggingapp.ui.Fragments
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -47,6 +53,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.AndroidEntryPoint
+import pub.devrel.easypermissions.AppSettingsDialog
+import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -57,7 +65,7 @@ import kotlin.collections.ArrayList
 import kotlin.math.round
 
 @AndroidEntryPoint
-class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListener {
+class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListener, EasyPermissions.PermissionCallbacks {
     val viewModel: MainViewModel by viewModels()
     private lateinit var binding: FragmentTrackingBinding
     private lateinit var user: User
@@ -81,7 +89,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
     var jogging: Jogging? = null
     var bitmap: String? = ""
     var distanceInMeter = 0f
-    val auth = FirebaseAuth.getInstance().currentUser?.uid
+    val auth = FirebaseAuth.getInstance().currentUser?.email
 
     private val TIME_STAMP = 100
     private val TAG: String = "Tracking Fragment"
@@ -105,6 +113,15 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
     private var results: FloatArray? = null
     private lateinit  var activityClassifier: ActivityClassified
 
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private var isFineLocation: Boolean = false
+    private var isCoarseLocation: Boolean = false
+    private var isBackgroundLocation: Boolean = false
+    private var isForeground: Boolean = false
+    private var isReadExternal: Boolean = false
+
+    private var permissionRequest: MutableList<String> = arrayListOf()
+
     val database = FirebaseFirestore.getInstance()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,10 +133,24 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
 //        return rootView
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+            permissionLauncher()
+            permissionLauncherVersionQLater()
+        }else {
+            permissionLauncherVersionQLater()
+            permissionLauncher()
+        }
+        requestPermission()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
+        sensorManager = requireActivity().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        mAccelerometer= sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
+        mGroScope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)!!
+        mLinearAcceleration = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)!!
         binding.mapView.onCreate(savedInstanceState)
         binding.btnToggleRun.setOnClickListener{
             toggleRun()
@@ -134,8 +165,14 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
 
             }
         binding.btnToggleFinishRun.setOnClickListener{
-            zoomToAllJoggingTrack()
-            createJogging()
+            if (map != null) {
+                zoomToAllJoggingTrack()
+                createJogging()
+            }else {
+                toast("Jogging Canceled")
+                val intent = Intent(requireActivity(), MainActivity::class.java)
+                startActivity(intent)
+            }
         }
         binding.mapView.getMapAsync {
             map = it
@@ -183,24 +220,37 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
 
     private fun stopRun() {
         sendCommandToService(ACTION_STOP_SERVICE)
-        findNavController().navigate(R.id.action_tracking_fragment_to_jogging_fragment)
+        findNavController().navigate(R.id.action_home)
     }
 
     private fun zoomToAllJoggingTrack() {
-        val bounds = LatLngBounds.Builder()
+        var bounds = LatLngBounds.Builder()
+        Log.d("TAG", "zoomToAllJoggingTrack: ${pathPoints.toString().trim()}")
         for(polyline in pathPoints) {
             for (pos in polyline) {
                 bounds.include(pos)
             }
         }
-        map?.moveCamera(
-            CameraUpdateFactory.newLatLngBounds(
-                bounds.build(),
-                binding.mapView.width,
-                binding.mapView.height,
-                (binding.mapView.height * 0.05f).toInt()
-            )
-        )
+        Log.d(TAG, "zoomToAllJoggingTrack: ${pathPoints.isEmpty().toString().trim()}")
+        if (map != null) {
+            if (pathPoints.toString() == "[[]]" || pathPoints.toString() == "[[], []]") {
+                toast("Jogging Di Cancel")
+                Log.d(TAG, "zoomToAllJoggingTrack: ${pathPoints.toString().trim()}")
+            }else {
+                map?.moveCamera(
+                    CameraUpdateFactory.newLatLngBounds(
+                        bounds.build(),
+                        binding.mapView.width,
+                        binding.mapView.height,
+                        (binding.mapView.height * 0.05f).toInt()
+                    )
+                )
+            }
+        }else {
+            Toast.makeText(requireActivity(), "Jogging di Cancel", Toast.LENGTH_SHORT)
+            findNavController().navigate(R.id.action_home)
+        }
+
     }
 
     private fun createJogging(){
@@ -258,89 +308,93 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
                 distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline)
             }
 
-            var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
-            val dateTimeStamp = Calendar.getInstance().timeInMillis
-            val caloriesBurned = ((distanceInMeter / 1000f) * user.weight)
-            this.distanceInMeter = distanceInMeter
-            this.jogging = jogging
-            this.dateTimeStamp = dateTimeStamp
-            this.caloriesBurned = caloriesBurned
-            this.avgSpeed = avgSpeed
-            this.bitmap =""
-            val documentDaillyCalorie = database.collection("DAILYCALORIE").document(auth!!.uid)
-            var dailyCalories = DailyCalories()
-            var calorie = 0f
-            documentDaillyCalorie.get().addOnCompleteListener {
-                if (it.isSuccessful) {
-                    val documentSnapshot = it.result
-                    dailyCalories = documentSnapshot.toObject(DailyCalories::class.java)!!
-                    calorie = dailyCalories.calorie - caloriesBurned
-                    dailyCalories.calorie = calorie
-                    documentDaillyCalorie.update("calorie", dailyCalories.calorie).addOnCompleteListener {
+            if (data != null) {
+                var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
+                val dateTimeStamp = Calendar.getInstance().timeInMillis
+                val caloriesBurned = ((distanceInMeter / 1000f) * user.weight)
 
-                    }.addOnFailureListener {
-                        Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
+                this.distanceInMeter = distanceInMeter
+                this.jogging = jogging
+                this.dateTimeStamp = dateTimeStamp
+                this.caloriesBurned = caloriesBurned
+                this.avgSpeed = avgSpeed
+                this.bitmap = ""
+                val documentDaillyCalorie = auth!!.email?.let { database.collection("USERS").document(it) }
+                var dailyCalories = DailyCalories()
+                var calorie = 0f
+                documentDaillyCalorie!!.get().addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val documentSnapshot = it.result
+                        var dailyCalories = documentSnapshot.toObject(User::class.java)!!
+                        calorie = dailyCalories.dailyCalorie - caloriesBurned
+                        dailyCalories.dailyCalorie = calorie
+                        documentDaillyCalorie?.update("dailyCalorie", dailyCalories.dailyCalorie)!!.addOnCompleteListener {
+
+                        }.addOnFailureListener {
+                            Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
+                        }
                     }
+                }.addOnFailureListener {
+                    Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
                 }
-            }.addOnFailureListener {
-                Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
-            }
-            fOut.flush()
-            fOut.close()
+                fOut.flush()
+                fOut.close()
 
-            Log.d("TAG", "getJogging: currentTimeInMillis" + this.currentTimeInMilliseconds.toString().trim())
-            Log.d("TAG", "getJogging: calories burned" + this.caloriesBurned.toString().trim())
-            Log.d("TAG", "getJogging: dateTimeStamp" + this.dateTimeStamp.toString().trim())
-            Log.d("TAG", "getJogging: user weight" + user.weight.toString().trim())
-            Log.d("TAG", "getJogging: distancen in meter" + this.distanceInMeter.toString().trim())
-            Log.d("TAG", "getJogging: bitmap" + this.bitmap.toString().trim())
-            Log.d("TAG", "getJogging: distance in meter" + distanceInMeter.toString().trim())
-            jogging = Jogging("", auth.toString(), "", this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
-            Log.d("TAG", "getJogging: jogging test ${this.jogging?.caloriesBurned.toString().trim() }}")
-            Log.d("TAG", "getJogging: return ${this.jogging?.caloriesBurned.toString().trim()}")
+                Log.d("TAG", "getJogging: currentTimeInMillis" + this.currentTimeInMilliseconds.toString().trim())
+                Log.d("TAG", "getJogging: calories burned" + this.caloriesBurned.toString().trim())
+                Log.d("TAG", "getJogging: dateTimeStamp" + this.dateTimeStamp.toString().trim())
+                Log.d("TAG", "getJogging: user weight" + user.weight.toString().trim())
+                Log.d("TAG", "getJogging: distancen in meter" + this.distanceInMeter.toString().trim())
+                Log.d("TAG", "getJogging: bitmap" + this.bitmap.toString().trim())
+                Log.d("TAG", "getJogging: distance in meter" + distanceInMeter.toString().trim())
+                jogging = Jogging("", auth.uid, "", this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
+                Log.d("TAG", "getJogging: jogging test ${this.jogging?.caloriesBurned.toString().trim() }}")
+                Log.d("TAG", "getJogging: return ${this.jogging?.caloriesBurned.toString().trim()}")
 
-            val document = database.collection(Constants.FirestoreTable.JOGGING).document()
+                val document = database.collection(Constants.FirestoreTable.JOGGING).document()
 
-            if (jogging != null) {
-                jogging?.id = document.id
-                document.set(jogging!!)
-                    .addOnSuccessListener {
-                        var storage = FirebaseStorage.getInstance().getReference("photo/jogging/${user.userId}/${document.id}.png")
-                        storage.putBytes(data)
-                            .addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    storage.downloadUrl
-                                        .addOnCompleteListener {
-                                            var imageUrl = it.result.toString()
-                                            val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
-                                            document2.update("img", imageUrl)
-                                            Log.d("TAG", "getJogging: url ${imageUrl}")
-                                        }
-                                } else {
-                                    Log.d("TAG", "getJogging: Image upload task is not successfull")
+                if (jogging != null) {
+                    jogging?.id = document.id
+                    document.set(jogging!!)
+                        .addOnSuccessListener {
+                            var storage = FirebaseStorage.getInstance().getReference("photo/jogging/${user.userId}/${document.id}.png")
+                            storage.putBytes(data)
+                                .addOnCompleteListener {
+                                    if (it.isSuccessful) {
+                                        storage.downloadUrl
+                                            .addOnCompleteListener {
+                                                var imageUrl = it.result.toString()
+                                                val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
+                                                document2.update("img", imageUrl)
+                                                Log.d("TAG", "getJogging: url ${imageUrl}")
+                                            }
+                                    } else {
+                                        Log.d("TAG", "getJogging: Image upload task is not successfull")
+                                    }
                                 }
-                            }
-                                toast("Success")
-                                Log.d("TAG", "getJogging: Success Save gmbar")
-                            }
-                            .addOnFailureListener{
-                                Toast.makeText(activity?.applicationContext, "Error : ${it.toString().trim()}", Toast.LENGTH_SHORT)
-                            }
-                        Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
-                        Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
-                        Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
-                    }else {
-                Log.d("TAG", "getJogging: Joggign is null")
+                            toast("Success")
+                            Log.d("TAG", "getJogging: Success Save gmbar")
+                        }
+                        .addOnFailureListener{
+                            Toast.makeText(activity?.applicationContext, "Error : ${it.toString().trim()}", Toast.LENGTH_SHORT)
+                        }
+                    Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
+                    Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
+                    Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
+                }else {
+                    Log.d("TAG", "getJogging: Joggign is null")
+                }
+                Log.d("TAG", "addJogging: " + jogging?.id)
+                Log.d("TAG", "addJogging: addJogging" + this.caloriesBurned)
+            }else {
+                toast("Jogging di cancel")
             }
-            Log.d("TAG", "addJogging: " + jogging?.id)
-            Log.d("TAG", "addJogging: addJogging" + this.caloriesBurned)
         }
     }
 
     private fun subscribeToObservers() {
         TrackingService.isTracking.observe(viewLifecycleOwner, Observer {
             updateTracking(it)
-
         })
         TrackingService.pathPoints.observe(viewLifecycleOwner, Observer{
             pathPoints = it
@@ -367,8 +421,6 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
         if(isTracking) {
             menu?.getItem(0)?.isVisible = true
             sendCommandToService(ACTION_PAUSE_SERVICE)
-
-
         }else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
         }
@@ -433,41 +485,42 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
 
     override fun onResume() {
         super.onResume()
-        binding.mapView?.onResume()
+//        binding.mapView?.onResume()
     }
 
     override fun onStart() {
         super.onStart()
-        binding.mapView?.onStart()
+//        binding.mapView?.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        binding.mapView?.onStop()
+//        binding.mapView?.onStop()
     }
 
     override fun onPause() {
 
         super.onPause()
+        sensorManager = requireActivity().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST)
         sensorManager.registerListener(this, mGroScope, SensorManager.SENSOR_DELAY_FASTEST)
         sensorManager.registerListener(this, mLinearAcceleration, SensorManager.SENSOR_DELAY_FASTEST)
-        binding.mapView?.onPause()
+//        binding.mapView?.onPause()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        binding.mapView?.onLowMemory()
+//        binding.mapView?.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.mapView?.onDestroy()
+//        binding.mapView?.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        binding.mapView?.onSaveInstanceState(outState)
+//        binding.mapView?.onSaveInstanceState(outState)
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -475,7 +528,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        TODO("Not yet implemented")
+
     }
 
     private fun toFloatArray(data: kotlin.collections.ArrayList<Float>): FloatArray? {
@@ -494,5 +547,159 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
             array[i++] = f ?: Float.NaN
         }
         return array
+    }
+
+    private fun requestPermissions() {
+        if (TrackingUtil.locationPermissions(requireContext())) {
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            EasyPermissions.requestPermissions(
+                this,
+                "You need to Accept location Permissions to Use this app",
+                Constants.REQUEST_CODE_LOCATION_PERMISSION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                "You need to Accept location Permissions to Use this app",
+                Constants.REQUEST_CODE_LOCATION_PERMISSION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
+        }
+    }
+
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        TODO("Not yet implemented")
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        } else {
+            requestPermissions()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+
+    }
+
+    private fun requestPermissionVersionQLater() {
+        isFineLocation = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        isCoarseLocation = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        isBackgroundLocation = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!isFineLocation){
+            permissionRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        if (!isCoarseLocation){
+            permissionRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+
+        if (!isBackgroundLocation){
+            permissionRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        if (permissionRequest.isNotEmpty()){
+            permissionLauncher.launch(permissionRequest.toTypedArray())
+        }
+
+        Log.d(TAG, "requestPermissionVersionQLater: ${isBackgroundLocation.let { it.toString() }}, ${isFineLocation.let { it.toString() }}, ${isCoarseLocation.let { it.toString() }}")
+    }
+
+    private fun permissionLauncherVersionQLater(){
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
+            isFineLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: isReadExternal
+            isCoarseLocation = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: isCoarseLocation
+            isBackgroundLocation = permissions[Manifest.permission.ACCESS_BACKGROUND_LOCATION] ?: isBackgroundLocation
+        }
+        Log.d(TAG, "requestPermissionVersionQLater: ${isBackgroundLocation.let { it.toString() }}, ${isFineLocation.let { it.toString() }}, ${isCoarseLocation.let { it.toString() }}")
+        requestPermissionVersionQLater()
+    }
+
+    private fun requestPermission() {
+        //        Add some permisison Request with permission that we need
+        if (!isReadExternal){
+            permissionRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        if (!isFineLocation){
+            permissionRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        if (!isCoarseLocation){
+            permissionRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+
+        if (!isForeground){
+            permissionRequest.add(Manifest.permission.FOREGROUND_SERVICE)
+        }
+        //        Change Permission Into Granted if Permisison is Granted
+        isReadExternal = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        isFineLocation = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        isCoarseLocation = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        isBackgroundLocation = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        isForeground = ContextCompat.checkSelfPermission(
+            context?.applicationContext!!,
+            Manifest.permission.FOREGROUND_SERVICE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (permissionRequest.isNotEmpty()){
+            permissionLauncher.launch(permissionRequest.toTypedArray())
+        }
+
+        Log.d(TAG, "requestPermissionVersionQLater: ${isBackgroundLocation.let { it.toString() }}, ${isFineLocation.let { it.toString() }}, ${isCoarseLocation.let { it.toString() }}")
+    }
+
+    private fun permissionLauncher(){
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
+            isFineLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: isFineLocation
+            isCoarseLocation = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: isCoarseLocation
+            isBackgroundLocation = permissions[Manifest.permission.ACCESS_BACKGROUND_LOCATION] ?: isBackgroundLocation
+        }
+
+        Log.d(TAG, "requestPermissionVersionQLater: ${isBackgroundLocation.let { it.toString() }}, ${isFineLocation.let { it.toString() }}, ${isCoarseLocation.let { it.toString() }}")
+        requestPermission()
     }
 }

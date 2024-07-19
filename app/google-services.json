@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1029304980240-9jjictl2pg4k5thhej9gcv8aau17ose9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dietjoggingapp",
+            "certificate_hash": "aae71cc38ad457620fc37165928939738371392d"
+          }
+        },
+        {
           "client_id": "1029304980240-sqt3metpig09gsj7n1oq4vl9fl8805nt.apps.googleusercontent.com",
           "client_type": 3
         }

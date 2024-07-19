@@ -5,122 +5,162 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.DatePicker
 import android.widget.Toast
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.databinding.ActivityRegisterBinding
 import com.example.dietjoggingapp.other.Constants
-import com.example.dietjoggingapp.other.UiState
-import com.example.dietjoggingapp.utility.toast
+import com.example.dietjoggingapp.other.registerUtils
+import com.example.dietjoggingapp.ui.Fragments.DatePickerFragment
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.StorageReference
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.Period
+import java.util.Calendar
+import javax.xml.datatype.DatatypeConstants
 
 class RegisterActivity : AppCompatActivity() {
     private var auth = FirebaseAuth.getInstance()
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var database: FirebaseFirestore
     private lateinit var storageReference: StorageReference
+    private lateinit var user: User
+    private var ageInYear: Float = 0.0f
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
 //        Setup register button
-        binding.btnRegister.setOnClickListener {
-            val email = binding.etEmail.text.toString()
-            val password = binding.etEmail.text.toString()
-            registerUser(email, password, setUser(), )
+
+        val c = Calendar.getInstance()
+
+        val current_date = c.get(Calendar.DAY_OF_MONTH)
+        val current_month = c.get(Calendar.MONTH)
+        val current_year = c.get(Calendar.YEAR)
+        val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+            binding.birhdate.setText("" + dayOfMonth + " " + month + ", " + year)
+        }, current_year, current_month, current_date)
+        binding.birhdate.setOnClickListener {
+            datePickerDialog.show()
         }
 
+        var ageDay = datePickerDialog.datePicker.dayOfMonth
+        var ageMonth = datePickerDialog.datePicker.month
+        var ageYear = datePickerDialog.datePicker.year
+
+        binding.btnRegister.setOnClickListener {
+            val email = binding.etEmail.text.toString()
+            val password = binding.etPassword.text.toString()
+            Log.d("TAG", "onCreate: ${password.trim()}")
+            registerUser(email, password, setUser(ageYear, ageMonth, ageDay))
+        }
 //        Setup tvLogin
         binding.addPicture.setOnClickListener {
-
         }
     }
 
-    private fun registerUser(email: String, password: String, user: User){ //result: (UiState<String>) -> Unit) {
+    private fun registerUser(email: String, password: String, user: User){
+        Log.d("TAG", "registerUser Password: ${password}")//result: (UiState<String>) -> Unit) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener{
                 Log.d("TAG", "registerUser: " + auth.currentUser?.uid.toString())
                 database = FirebaseFirestore.getInstance()
-                val document = database.collection(Constants.FirestoreTable.USERS).document()
-                user.userId = document.id
-                document.set(user)
-                    .addOnSuccessListener {
-                        Log.d("TAG", "registerUser: " + user.userId)
-                        val intent: Intent = Intent(this, LoginActivity::class.java)
-                        startActivity(intent)
-                    }
-                    .addOnFailureListener{
-                        Log.d("TAG", "addUser: " + it.localizedMessage)
-                    }
+                val document = database.collection(Constants.FirestoreTable.USERS).document(email)
+                user.userId = it.result.user?.uid.toString()
+                if (user.age < 18) {
+                    Toast.makeText(this, "Anda belumcukup umur", Toast.LENGTH_SHORT).show()
+                }else {
+                    document.set(user)
+                        .addOnSuccessListener {
+                            Log.d("TAG", "registerUser: " + user.userId)
+                            val intent: Intent = Intent(this, LoginActivity::class.java)
+                            startActivity(intent)
+                        }
+                        .addOnFailureListener{
+                            Log.d("TAG", "addUser: " + it.localizedMessage.trim())
+                            Log.d("TAG", "registerUser: ${it.message?.trim()}")
+                        }
+                        .addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                Toast.makeText(this, "Register Successfull!!", Toast.LENGTH_SHORT).show()
+                            }else {
+                                Toast.makeText(this, "Error ${it.exception?.message?.toString()}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        .addOnFailureListener {
+                            Log.d("TAG", "addUser: " + it.localizedMessage.trim())
+                            Log.d("TAG", "registerUser: ${it.message?.trim()}")
+                        }
+                }
             }
     }
 
-    private fun setUser(): User {
+    private fun setUser(year: Int, month: Int, day: Int): User {
         val email = binding.etEmail.text.toString()
         val name = binding.etName.text.toString()
         val weight = binding.etWeight.text.toString().toFloat()
-        val height  = binding.etHeight.text.toString().toFloat()
+        val height  = (binding.etHeight.text.toString().toFloat() / 100.00).toBigDecimal().setScale(2, RoundingMode.DOWN).toFloat()
         val age = binding.etAge.text.toString().toFloat()
         var gender = ""
         binding.rgGender.setOnCheckedChangeListener { group, checkedId ->
             if(checkedId == R.id.rbMale) {
-                gender = "Male"
+                gender = "male"
             } else {
-                gender = "Female"
+                gender = "female"
             }
         }
+        Log.d("TAG", "registerUser: ${ow(weight, height).toString()}")
+        val c = Calendar.getInstance()
 
-
-
-        val current_date = SimpleDateFormat("dd").format(System.currentTimeMillis()).toInt()
-        val current_month = SimpleDateFormat("MM").format(System.currentTimeMillis()).toInt()
-        val current_year = SimpleDateFormat("yyy").format(System.currentTimeMillis()).toInt()
+        val current_date = c.get(Calendar.DAY_OF_MONTH)
+        val current_month = c.get(Calendar.MONTH)
+        val current_year = c.get(Calendar.YEAR)
 
         val ageDay: Int
         val ageMonth: Int
         val ageYear: Int
 
-        val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->  },
-            current_year, current_month, current_date)
-        binding.etBirthDate.setOnClickListener {
-            datePickerDialog.show()
+
+
+//        val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+//            binding.etBirthDate.setText("" + dayOfMonth + " " + month + ", " + year)
+//        }, current_year, current_month, current_date)
+//        binding.birthDateLayout.setOnClickListener {
+//            datePickerDialog.show()
+//        }
+
+        ageInYear = registerUtils.ageInYear(year, month, day)
+        if(ageInYear < 18) {
+            Toast.makeText(this, "Anda belum cukup umur", Toast.LENGTH_LONG).show()
         }
-
-        ageDay = datePickerDialog.datePicker.dayOfMonth
-        ageMonth = datePickerDialog.datePicker.month
-        ageYear = datePickerDialog.datePicker.year
-
-        return User(
-            userId = "",
+        user = User(userId = "",
             fullName = name,
             email = email,
-            dailyCalorie = dailyCalorie(),
-            bmr = dailyCalorie(),
+            dailyCalorie = dailyCalorie(weight, height, age),
+            bmr = dailyCalorie(weight, height, ageInYear),
             weight = weight,
             height = height,
-            age = age,
+            age = ageInYear,
             gender = gender,
-            birthDate = ageDay,
-            birthMonth = ageMonth,
-            birthYear = ageYear,
-        )
+            calDef = calDef(weight, height, age),
+            overweight = ow(weight, height),
+            maxWeight = maxWeight(height),
+            birthDate = day,
+            birthMonth = month,
+            birthYear = year,)
+        return user
     }
 
-    private fun dailyCalorie(): Float {
-        val weight = binding.etWeight.text.toString().toFloat()
-        val height = binding.etHeight.text.toString().toFloat()
-        val age = binding.etAge.text.toString().toFloat()
+    private fun dailyCalorie(weight: Float, height: Float, age: Float):Float {
         var gender: String = ""
 
         binding.rgGender.setOnCheckedChangeListener { group, checkedId ->
             if(checkedId == R.id.rbMale) {
-                gender = "Male"
+                gender = "male"
             } else {
                 gender = "female"
             }
@@ -128,17 +168,34 @@ class RegisterActivity : AppCompatActivity() {
 
         var bmr = 0.0f
 
-        if(gender == "Male") {
-            bmr = (10.0f * weight + 6.25f * height - 5.0f * age + 5.0f).toFloat()
+        if(gender == "male") {
+            bmr = 66 + 13.7f * weight + 5.0f * height - 6.78f * age
         } else {
-            bmr = (10.0f * weight + 6.25f * height - 5.0f * age - 161.0f).toFloat()
+            bmr = 66 + 9.6f * weight + 1.8f * height - 4.7f * age
         }
-
         return bmr
     }
 
+    private fun calDef(weight: Float, height: Float, age: Float): Float {
+        var caldef = dailyCalorie(weight, height, age) - 500
+        return caldef
+    }
+    private fun ow(weight: Float, height: Float): Float {
+        val bmi = weight/(height*height)
+        var ow = 0.0f
+        if (bmi > 25) {
+            val maxweight: Float = (user.height * user.height) / 25
+            ow = maxweight - weight
+        }
+        return ow
+    }
+
+    private fun maxWeight(height: Float) : Float {
+        var maxWeight = 25 / (height * height)
+        return maxWeight
+    }
     fun validation(): Boolean {
-        var isValid = true
+        var isValid = false
         var name = binding.etName.text.toString()
         var email = binding.etEmail.text.toString()
         var password = binding.etPassword.text.toString()
@@ -175,7 +232,7 @@ class RegisterActivity : AppCompatActivity() {
             isValid = true
             Toast.makeText(this, "Password & Confirm Password not identic", Toast.LENGTH_SHORT)
         }
-        if (password?.length!! < 6){
+        if (password?.length!! < 8){
             isValid = false
             Toast.makeText(this, getString(R.string.longer_pass), Toast.LENGTH_SHORT)
         }

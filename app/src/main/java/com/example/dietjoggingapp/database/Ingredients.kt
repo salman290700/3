@@ -5,6 +5,6 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Ingredients (
-    var position: Int = 0,
+    var name: String = "",
     var servingSizeInGram: Float = 0f,
         ): Parcelable

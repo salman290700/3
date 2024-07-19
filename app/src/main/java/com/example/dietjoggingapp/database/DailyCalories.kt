@@ -9,4 +9,5 @@ data class DailyCalories(
     var id: String = "",
     var calorie: Float = 0f,
     var user_id: String = "",
+    var date: Int = Date().date
 ):Parcelable

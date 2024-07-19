@@ -88,12 +88,9 @@ class RegisterFragment : Fragment() {
         binding.btnRegister.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val pass = binding.etPassword.text.toString()
-
-            if(validation()) {
                 viewModel.registerUser(email = email,
                 password = pass,
                 user = getUserObj())
-            }
         }
 
 

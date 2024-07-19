@@ -5,6 +5,9 @@
     android:padding="@dimen/_8sdp"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/baclground_foodsug"
+    android:layout_marginBottom="@dimen/_8sdp"
+    android:layout_marginHorizontal="@dimen/_8sdp"
     >
     <ImageView
         android:id="@+id/ivFoodSuggestImage"
@@ -39,10 +42,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/tvDescription"
+            android:justificationMode="inter_word"
             android:textSize="@dimen/_12ssp"
             android:text="Description"
             android:textColor="@color/white"/>
     </LinearLayout>
-
-
 </LinearLayout>
