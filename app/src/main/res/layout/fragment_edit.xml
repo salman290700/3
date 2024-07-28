@@ -110,26 +110,6 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ageLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_20sdp"
-                android:background="@color/white"
-                android:paddingHorizontal="@dimen/_4sdp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etAge"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white"
-                    android:hint="Enter your age (in year)"
-                    android:inputType="numberDecimal"
-                    android:textColor="@color/black"
-
-                    />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/genderLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -121,7 +121,8 @@ class RegisterFragment : Fragment() {
         val email = binding.etEmail.text.toString()
         val weight = binding.etWeight.text.toString().toFloat()
         val height = binding.etHeight.text.toString().toFloat()
-        val age = binding.etAge.text.toString().toFloat()
+        val age = binding.etAge.text.toString().toInt()
+
         return User(
             userId = "",
             fullName = name,
@@ -141,8 +142,8 @@ class RegisterFragment : Fragment() {
         var gender: String = ""
 
         binding.rgGender.setOnCheckedChangeListener { group, checkedId ->
-            if(checkedId == R.id.rbMale) {
-                gender = "Male"
+            if(binding.rbMale.isChecked) {
+                gender = "male"
             } else {
                 gender = "female"
             }
@@ -150,7 +151,7 @@ class RegisterFragment : Fragment() {
 
         var bmr = 0.0f
 
-        if(gender == "Male") {
+        if(gender == "male") {
             bmr = (10.0f * weight + 6.25f * height - 5.0f * age + 5.0f).toFloat()
         } else {
             bmr = (10.0f * weight + 6.25f * height - 5.0f * age - 161.0f).toFloat()

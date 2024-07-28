@@ -6,17 +6,17 @@ import java.time.Period
 
 class registerUtils {
     companion object {
-        fun ageInYear(year: Int, month: Int, dayOfMonth: Int): Float {
+        fun ageInYear(year: Int, month: Int, dayOfMonth: Int): Int {
             Log.d("TAG", "ageInYear: ${
                 Period.between(
                     LocalDate.of(year, month, dayOfMonth),
                     LocalDate.now()
-                ).years.toFloat()
+                ).years
             }")
         return Period.between(
             LocalDate.of(year, month, dayOfMonth),
             LocalDate.now()
-        ).years.toFloat()
+        ).years
         }
     }
 }

@@ -66,7 +66,7 @@ class AccountDetailFragment : Fragment() {
             name = user!!.fullName
             weight = user!!.weight
             calorie = user!!.dailyCalorie
-            tallInCm = user!!.height
+            tallInCm = user!!.height * 100.00f
 
             binding.tvEmail.text = email
             binding.tvName.text = name

@@ -9,8 +9,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -110,6 +112,9 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
     private lateinit var mGroScope: Sensor
     private lateinit var mLinearAcceleration: Sensor
 
+    private lateinit var locationManager: LocationManager
+    var gpsStatus = false
+
     private var results: FloatArray? = null
     private lateinit  var activityClassifier: ActivityClassified
 
@@ -147,6 +152,7 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        checkGpsStatus()
         sensorManager = requireActivity().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccelerometer= sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
         mGroScope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)!!
@@ -701,5 +707,20 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
 
         Log.d(TAG, "requestPermissionVersionQLater: ${isBackgroundLocation.let { it.toString() }}, ${isFineLocation.let { it.toString() }}, ${isCoarseLocation.let { it.toString() }}")
         requestPermission()
+    }
+
+    private fun checkGpsStatus() {
+        locationManager = context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        if (gpsStatus) {
+            toast("GPS Is Enabled")
+        } else {
+            toast("GPS Is Disabled")
+            gpsStatus()
+        }
+    }
+    fun gpsStatus() {
+        val intent1 = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+        startActivity(intent1)
     }
 }

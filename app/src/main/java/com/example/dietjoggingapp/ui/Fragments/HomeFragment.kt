@@ -18,6 +18,8 @@ import com.example.dietjoggingapp.utility.Constants
 import com.example.dietjoggingapp.utility.toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.math.RoundingMode
+import kotlin.math.roundToInt
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -39,7 +41,6 @@ class HomeFragment : Fragment() {
     private lateinit var user: User
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(
@@ -68,9 +69,9 @@ class HomeFragment : Fragment() {
         database.collection("USERS").document(email).get()
             .addOnCompleteListener {
                 user = it.result.toObject(User::class.java)!!
-                binding.tvOW.text = user?.overweight.toString()
+                binding.tvOW.text = user?.overweight?.roundToInt().toString()
                 binding.tvbmr.text = user?.bmr.toString()
-                binding.tvWeight.text = user?.weight.toString()
+                binding.tvWeight.text = user?.weight.toString().toFloat().roundToInt().toString()
                 binding.tvAge.text = registerUtils.ageInYear(user.birthYear, user.birthMonth, user.birthDate).toString()
                 binding.tvTallincm.text = (user?.height!! * 10.0f).toBigDecimal().setScale(1).toString()
                 countOW()
@@ -86,7 +87,12 @@ class HomeFragment : Fragment() {
         database.collection("USERS").document(email).get()
             .addOnCompleteListener {
                 user = it.result.toObject(User::class.java)!!
-                binding.tvOW.text = user?.overweight.toString()
+                if(user?.overweight!! > 0.0) {
+                    binding.tvOW.text = user?.overweight.toString()
+                }else {
+                    binding.tvOW.text = "Normal"
+                    binding.tvblebih.text = "Berat badan ${user?.fullName!!.trim()}"
+                }
                 binding.tvbmr.text = user?.bmr.toString()
                 binding.tvWeight.text = user?.weight.toString()
                 binding.tvTallincm.text = (user?.height!! * 100.0f).toString()
@@ -98,27 +104,35 @@ class HomeFragment : Fragment() {
             }
     }
 
+    private fun maxWeight(height: Float) : Float {
+        var maxWeight = 25 * (height * height)
+        return maxWeight
+    }
+
     private fun countOW() {
-        if (user?.weight!! > user?.maxWeight!!) {
+
+        if (user?.maxWeight!! > user?.weight!!) {
             binding.tvOW.text = "${(user?.weight!! - user?.maxWeight!!).toString()} KG"
         }else {
             binding.tvOW.text = "Normal"
-            binding.tvblebih.text = "Berat badan anda"
+            binding.tvblebih.text = "Berat badan ${user.fullName}"
         }
     }
 
     private fun countJogSug() {
         var dietCalorie = user?.bmr!!-1000
-        var K = dietCalorie * 20/100
+//        var K = dietCalorie * 20/100
 
+        var K = dietCalorie
         var C = (2.8 * 7.7 * (user?.weight!! * 2.2))/200
+        Log.d("TAG", "countJogSug: ${C}")
         var J = K/C
         binding.tvJogSug.text = "${J.toString()} Menit"
 
         if (user?.weight!! < user?.maxWeight!!) {
-            binding.tvJogSug.text = "20 Menit"
+            binding.tvJogSug.text = "No Jogging"
         }else {
-            binding.tvJogSug.text = "${J.toString().trim()} Menit"
+            binding.tvJogSug.text = "${J.roundToInt().toString().trim()} Menit"
         }
     }
 

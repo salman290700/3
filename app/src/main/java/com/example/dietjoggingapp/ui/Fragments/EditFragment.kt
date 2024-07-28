@@ -30,9 +30,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -59,10 +62,15 @@ class EditFragment : Fragment() {
     private var auth = FirebaseAuth.getInstance().currentUser?.email.toString()
     private val database = FirebaseFirestore.getInstance()
     private lateinit var user: User
+    private var gender = ""
 
     val current_date = SimpleDateFormat("dd").format(System.currentTimeMillis()).toInt()
     val current_month = SimpleDateFormat("MM").format(System.currentTimeMillis()).toInt()
     val current_year = SimpleDateFormat("yyy").format(System.currentTimeMillis()).toInt()
+    var ageDay: Int = 0
+    var ageMonth: Int = 0
+    var ageYear: Int = 0
+    private var age: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,39 +86,6 @@ class EditFragment : Fragment() {
         return binding.root
     }
 
-    fun age(year: Int, Month: Int, dayOfMonth: Int): String {
-        var modCurrentDate = current_date
-        var modCurrentMonth = current_month
-        var modCurrentYear = current_year
-
-        val ageDay: Int
-        val ageMonth: Int
-        val ageYear: Int
-
-        if (dayOfMonth > modCurrentDate) {
-            modCurrentDate += 30
-            modCurrentMonth -= 1
-
-            ageDay = modCurrentDate - dayOfMonth
-        }else {
-            ageDay = modCurrentDate - dayOfMonth
-        }
-
-        if (Month > modCurrentMonth) {
-            modCurrentMonth += 12
-            modCurrentYear -= 1
-
-            ageMonth = modCurrentMonth - Month
-        }else {
-            ageMonth = modCurrentMonth - Month
-        }
-
-        ageYear = modCurrentYear - year
-        return ageYear.toString() +  "years"
-    }
-
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addPicture.setOnClickListener {
@@ -120,33 +95,24 @@ class EditFragment : Fragment() {
                 .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
                 .start()
         }
-
-
 //        binding.add
-        val c = Calendar.getInstance()
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
-//        val datePickerDialog = DatePickerDialog(requireContext(), this, year, month, day)
-
-        val datePickerDialog =
-                DatePickerDialog(
-                    requireContext(), DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->  },
-                    current_year, current_month, current_date)
-        binding.etBirthDate.setOnClickListener {
-            datePickerDialog?.show()
-        }
         email = auth
         database.collection("USERS").document(email).get()
             .addOnCompleteListener {
                 if (it.isSuccessful) {
                     user = it.result.toObject(User::class.java)!!
                     binding.etEmail.setText(user.email)
-                    binding.etEmail.setTextColor(Color.WHITE)
                     binding.etName.setText(user.fullName)
-                    binding.etName.setTextColor(Color.WHITE)
                     binding.etHeight.setText(user.height.toString())
                     binding.etWeight.setText(user.weight.toString())
+                    ageDay = user.birthDate
+                    ageMonth = user.birthMonth
+                    ageYear = user.birthYear
+                    if (user.gender == "male") {
+                        binding.rbMale.isChecked = true
+                    }else {
+                        binding.rbFemale.isChecked = true
+                    }
 //                    binding.etBirthDate.setText("${user.birthDate} - ${user.birthMonth} - ${user.birthYear}")
                     //update birthdate
                 }
@@ -155,10 +121,20 @@ class EditFragment : Fragment() {
                 Log.d("TAG", "onViewCreated: ${it.localizedMessage.toString()}")
                 Log.d("TAG", "onViewCreated: ${it.message.toString()}")
             }
-        var ageDay = datePickerDialog.datePicker.dayOfMonth
-        var ageMonth = datePickerDialog.datePicker.month
-        var ageYear = datePickerDialog.datePicker.year
 
+        val datePickerDialog =
+                DatePickerDialog(
+                    requireContext(), DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+                        ageDay = dayOfMonth
+                        ageMonth = month
+                        ageYear = year
+                        var stringBD: String = "${ageYear} - ${ageMonth} - ${ageDay}"
+                        binding.etBirthDate.setText(stringBD)
+                    },
+                    current_year, current_month, current_date)
+        binding.etBirthDate.setOnClickListener {
+            datePickerDialog?.show()
+        }
         binding.save.setOnClickListener {
             save(ageDay, ageMonth, ageYear)
         }
@@ -168,25 +144,27 @@ class EditFragment : Fragment() {
         var gender: String = ""
 
         binding.rgGender.setOnCheckedChangeListener { group, checkedId ->
-            if(checkedId == R.id.rbMale) {
-                gender = "male"
-            } else {
-                gender = "female"
-            }
+
+        }
+
+        if(binding.rbMale.isChecked) {
+            gender = "male"
+        } else {
+            gender = "female"
         }
 
         var bmr = 0.0f
 
         if(gender == "male") {
-            bmr = 66 + 13.7f * weight + 5.0f * height - 6.78f * age
+            bmr = 66 + 13.7f * (weight * 2.2f) + 5.0f * (height * 2.54f) - 6.78f * age
         } else {
-            bmr = 66 + 9.6f * weight + 1.8f * height - 4.7f * age
+            bmr = 66 + 9.6f * (weight * 2.2f) + 1.8f * (height * 2.54f) - 4.7f * age
         }
         return bmr
     }
 
     private fun maxWeight(height: Float) : Float {
-        var maxWeight = 25 / (height * height)
+        var maxWeight = 25 * (height * height)
         return maxWeight
     }
 
@@ -202,35 +180,79 @@ class EditFragment : Fragment() {
 
 
     fun save(ageDay: Int, ageMonth: Int, ageYear: Int) {
-        val age = registerUtils.ageInYear(ageDay, ageMonth, ageYear)
-        var gender = ""
         binding.rgGender.setOnCheckedChangeListener { group, checkedId ->
-            if(checkedId == R.id.rbMale) {
-                gender = "male"
-            } else {
-                gender = "female"
-            }
-        }
-        database.collection("USERS").document(email).update(
-            "fullname", binding.etName.text,
-        "weight", binding.etWeight.text,
-        "height", binding.etHeight.text,
-        "age", age,
-        "bmr", dailyCalorie(binding.etWeight.text.toString().toFloat(), binding.etHeight.text.toString().toFloat(), age),
-        "maxWeight", maxWeight(binding.etHeight.text.toString().toFloat()),
-        "overweight",ow(binding.etWeight.text.toString().toFloat(), binding.etHeight.text.toString().toFloat()),
-            "gender", gender,
-        "birthDate", ageDay,
-        "birthMonth", ageMonth,
-        "birthYear", ageYear)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    toast("Edit Profile Berhasil")
-                } else {
-                    toast("Edit Profile Gagal")
-                }
-            }
 
+        }
+
+        if(binding.rbMale.isChecked) {
+            gender = "male"
+        } else {
+            gender = "female"
+        }
+        val fullname = binding.etName.text.toString()
+        val weight = binding.etWeight.text.toString().toFloat().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
+        val height = binding.etHeight.text.toString().toFloat().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
+        val maxWeight: Float = maxWeight((binding.etHeight.text.toString().toFloat() / 100.00).toBigDecimal().setScale(2, RoundingMode.DOWN).toFloat())
+        val ow: Float = ow(binding.etWeight.text.toString().toFloat(), binding.etHeight.text.toString().toFloat())
+        age = registerUtils.ageInYear(ageYear, ageMonth, ageDay)
+        val bmr = dailyCalorie(binding.etWeight.text.toString().toFloat(), binding.etHeight.text.toString().toFloat(), age.toFloat())
+        var updateUser: HashMap<String, Any> = HashMap()
+        var user = User()
+        user.fullName = binding.etName.text.toString()
+        user.weight = binding.etWeight.text.toString().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
+        user.height = binding.etHeight.text.toString().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
+        user.age = age
+        user.bmr = bmr
+        user.maxWeight = maxWeight
+        user.overweight = ow
+        user.gender = gender
+        user.birthDate = ageDay
+        user.birthMonth = ageMonth
+        user.birthYear = ageYear
+        updateUser.put("fullName", fullname)
+        updateUser.put("weight", weight)
+        updateUser.put("height", height)
+        updateUser.put("age", age)
+        updateUser.put("bmr", bmr)
+        updateUser.put("maxWeight", maxWeight)
+        updateUser.put("overweight", ow)
+        Log.d("TAG", "save: ${gender}")
+        updateUser.put("gender", gender)
+        Log.d("TAG", "save: ${gender}")
+        updateUser.put("birthDate", ageDay)
+        updateUser.put("birthMonth", ageMonth)
+        updateUser.put("birthYear", ageYear)
+        database.collection("USERS").document(email).update(updateUser)
+            .addOnCompleteListener {
+                if(it.isSuccessful) {
+                    toast("Update Profile Berhasil")
+                    findNavController().navigate(R.id.action_home)
+                }else {
+                    toast("Update Profile Gagal")
+                }
+            }.addOnFailureListener {
+                Log.d("TAG", "save: ${it.localizedMessage.toString().trim()}")
+                Log.d("TAG", "save: ${it.message.toString().trim()}")
+            }
+//        database.collection("USERS").document(email).update(
+//            "fullname", binding.etName.text,
+//        "weight", binding.etWeight.text,
+//        "height", binding.etHeight.text,
+//        "age", age,
+//        "bmr", bmr,
+//        "maxWeight", maxWeight,
+//        "overweight", ow,
+//            "gender", gender,
+//        "birthDate", ageDay,
+//        "birthMonth", ageMonth,
+//        "birthYear", ageYear)
+//            .addOnCompleteListener {
+//                if (it.isSuccessful) {
+//                    toast("Edit Profile Berhasil")
+//                } else {
+//                    toast("Edit Profile Gagal")
+//                }
+//            }
     }
 
     private fun init() {
@@ -248,8 +270,6 @@ class EditFragment : Fragment() {
                 }
             }
         }
-
-
     }
 
     private fun initCloudStorage(uri: Uri) {
@@ -277,5 +297,7 @@ class EditFragment : Fragment() {
             Toast.makeText(requireActivity().applicationContext, "Task Canceled", Toast.LENGTH_SHORT)
         }
     }
+
+
 
 }
