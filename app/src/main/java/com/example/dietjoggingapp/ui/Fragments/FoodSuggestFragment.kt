@@ -1,13 +1,16 @@
 package com.example.dietjoggingapp.ui.Fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.adapters.FoodSuggestAdapter
 import com.example.dietjoggingapp.database.Ingredients
@@ -72,19 +75,29 @@ class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest), FoodSugges
         foodSuggestadapter.listener = this
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onItemClicked(view: View, foodSuggest: FoodSuggest) {
         val name = foodSuggest.name
         val desc = foodSuggest.description
         val image = foodSuggest.image
+        Log.d(TAG, "onItemClicked: ${name.toString().trim()}")
         var ingredients = mutableListOf<Ingredients>()
-
-        for (i in 0..foodSuggest.ingredients.size) {
-            var ingredient = Ingredients(foodSuggest.ingredients.get(i).name, foodSuggest.ingredients.get(i).servingSize.grams)
+        for (i in 0..foodSuggest.ingredients.size-1) {
+            var ingredient = Ingredients()
+            if (foodSuggest.ingredients.get(i).servingSize.grams == null) {
+                ingredient = Ingredients(foodSuggest.ingredients.get(i).name, 0f,foodSuggest.ingredients.get(i).servingSize.desc)
+            } else {
+                ingredient = Ingredients(foodSuggest.ingredients.get(i).name, foodSuggest.ingredients.get(i).servingSize.grams)
+            }
             ingredients.add(i, ingredient)
+            Log.d("TAG", "onItemClicked: ${ingredient.toString().trim()}")
         }
 
-        val foodSuggestSer = foodsugser(foodSuggest.id, name, desc, foodSuggest.tags, foodSuggest.steps, image, ingredients)
+        val foodSuggestSer = foodsugser(foodSuggest.id, name, desc, foodSuggest.steps, image, ingredients)
         val bundle = Bundle()
         bundle.putParcelable("foodSuggest", foodSuggestSer)
+        val fragment = DetailfoodSugFragment()
+        fragment.arguments = bundle
+        findNavController().navigate(R.id.action_detailFoodSug, bundle)
     }
 }

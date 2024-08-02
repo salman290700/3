@@ -24,6 +24,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
+import com.example.dietjoggingapp.database.CalDef
 import com.example.dietjoggingapp.database.DailyCalories
 import com.example.dietjoggingapp.database.Jogging
 import com.example.dietjoggingapp.database.User
@@ -61,9 +62,12 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.Map
 import kotlin.math.round
 
 @AndroidEntryPoint
@@ -317,8 +321,9 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
             if (data != null) {
                 var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
                 val dateTimeStamp = Calendar.getInstance().timeInMillis
-                val caloriesBurned = ((distanceInMeter / 1000f) * user.weight)
+//                val caloriesBurned = ((distanceInMeter / 1000f) * user.weight) * 2.8f
 
+                val caloriesBurned = (((2.8f * 7.7f * ((user.weight * 100) * 2.2f)) / 200) * ((currentTimeInMilliseconds / 1000) / 60)).toBigDecimal().setScale(2, RoundingMode.DOWN).toFloat()
                 this.distanceInMeter = distanceInMeter
                 this.jogging = jogging
                 this.dateTimeStamp = dateTimeStamp
@@ -328,11 +333,46 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
                 val documentDaillyCalorie = auth!!.email?.let { database.collection("USERS").document(it) }
                 var dailyCalories = DailyCalories()
                 var calorie = 0f
+                var caldef = CalDef(user.email, caloriesBurned)
+                database.collection("CALDEF").document(user.email).get()
+                    .addOnCompleteListener {
+                        if(it.result == null) {
+                            database.collection("CALDEF").document(user.email).set(caldef)
+                                .addOnCompleteListener {
+                                    toast("Update data Calorie Defisit Berhasil")
+                                }.addOnFailureListener {
+                                    toast("update data Calorie Deficit Gagal")
+                                }
+                        }else {
+                            var caldef = it.result.toObject(CalDef::class.java)
+
+                            if (caldef?.date == "${Date().year} ${Date().month} ${Date().date}") {
+                                var Caldef = caldef!!.caldef!!.toFloat()
+                                Caldef = Caldef + caloriesBurned
+                                var updateCaldef: HashMap<String, Any> = HashMap()
+                                updateCaldef.put("ca;def", Caldef)
+                                var date = "${Date().year} ${Date().month} ${Date().date}"
+                                updateCaldef.put("date", date)
+                                database.collection("CalDef").document(user.email).update("caldef", Caldef)
+                            }else {
+                                var Caldef = caloriesBurned
+                                var updateCaldef: HashMap<String, Any> = HashMap()
+                                updateCaldef.put("ca;def", Caldef)
+                                updateCaldef.put("date", Date())
+                                database.collection("CalDef").document(user.email).update("caldef", Caldef)
+                            }
+                        }
+                    }
+                    .addOnFailureListener {
+                        toast("${it.localizedMessage.toString()}")
+                        toast("${it.message.toString()}")
+                    }
                 documentDaillyCalorie!!.get().addOnCompleteListener {
                     if (it.isSuccessful) {
                         val documentSnapshot = it.result
                         var dailyCalories = documentSnapshot.toObject(User::class.java)!!
                         calorie = dailyCalories.dailyCalorie - caloriesBurned
+
                         dailyCalories.dailyCalorie = calorie
                         documentDaillyCalorie?.update("dailyCalorie", dailyCalories.dailyCalorie)!!.addOnCompleteListener {
 

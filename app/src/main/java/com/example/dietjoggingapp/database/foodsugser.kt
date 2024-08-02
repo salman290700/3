@@ -9,10 +9,9 @@ import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class foodsugser(
-    var id: String = "",
-    var name: String = "",
-    var desc: String = "",
-    var tags: MutableList<String> = mutableListOf(),
+    var id: String? = "",
+    var name: String? = "",
+    var desc: String? = "",
     var steps: MutableList<Step> = mutableListOf(),
     var image: String = "",
     var ingredients: MutableList<Ingredients> = mutableListOf()

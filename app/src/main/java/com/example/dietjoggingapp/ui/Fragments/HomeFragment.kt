@@ -7,18 +7,24 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
+import com.example.dietjoggingapp.database.CalDef
 import com.example.dietjoggingapp.database.DailyCalories
 import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.databinding.FragmentHomeBinding
 import com.example.dietjoggingapp.other.registerUtils
 import com.example.dietjoggingapp.ui.LoginActivity
+import com.example.dietjoggingapp.ui.viewmodels.MainViewModel
 import com.example.dietjoggingapp.utility.Constants
 import com.example.dietjoggingapp.utility.toast
+import com.example.dietjoggingapp.utility.utils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.math.RoundingMode
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
 // TODO: Rename parameter arguments, choose names that match
@@ -38,6 +44,7 @@ class HomeFragment : Fragment() {
     private var joggingSuggestion: Float = 0f
     private lateinit var overCalorie: String
     private val email = auth?.email!!
+    private val viewModel: MainViewModel by viewModels()
     private lateinit var user: User
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +73,7 @@ class HomeFragment : Fragment() {
 //            val intent = Intent(requireActivity().applicationContext, AddDetailFood::class.java)
 //            startActivity(intent)
 //        }
+        val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
         database.collection("USERS").document(email).get()
             .addOnCompleteListener {
                 user = it.result.toObject(User::class.java)!!
@@ -79,6 +87,41 @@ class HomeFragment : Fragment() {
             }.addOnFailureListener {
                 Log.d("TAG", "onResume: ${it.message.toString()}")
                 Log.d("TAG", "onResume: ${it.localizedMessage.toString()}")
+            }
+        var user1 = FirebaseAuth.getInstance().currentUser
+        var caldef = CalDef(user1!!.email.toString(), 0.0f)
+
+        database.collection("CALDEF").document(user1!!.email.toString()).get()
+            .addOnCompleteListener {
+                if(it.result.toObject(CalDef::class.java) == null) {
+                    database.collection("CALDEF").document(user1!!.email.toString()).set(caldef)
+                        .addOnCompleteListener {
+                            toast("Update data Calorie Defisit Berhasil")
+                        }.addOnFailureListener {
+                            toast("update data Calorie Deficit Gagal")
+                        }
+                }else {
+                    var caldef = it.result.toObject(CalDef::class.java)
+
+                    if (caldef?.date == "${Date().year} ${Date().month} ${Date().date}") {
+                        var Caldef = caldef!!.caldef!!.toFloat()
+                        var updateCaldef: HashMap<String, Any> = HashMap()
+                        updateCaldef.put("ca;def", Caldef)
+                        var date = "${Date().year} ${Date().month} ${Date().date}"
+                        updateCaldef.put("date", date)
+                        database.collection("CalDef").document(user1!!.email.toString()).update("caldef", Caldef)
+                    }else {
+                        var Caldef = 0.0f
+                        var updateCaldef: HashMap<String, Any> = HashMap()
+                        updateCaldef.put("ca;def", Caldef)
+                        updateCaldef.put("date", Date())
+                        database.collection("CalDef").document(user1!!.email.toString()).update("caldef", Caldef)
+                    }
+                }
+            }
+            .addOnFailureListener {
+                toast("${it.localizedMessage.toString()}")
+                toast("${it.message.toString()}")
             }
     }
 

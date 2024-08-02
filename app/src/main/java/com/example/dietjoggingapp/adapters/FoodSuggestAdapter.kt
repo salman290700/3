@@ -68,25 +68,28 @@ class FoodSuggestAdapter: RecyclerView.Adapter<FoodSuggestAdapter.FoodSuggestVie
         val englishIndonesianTranslator = Translation.getClient(options)
         var conditions = DownloadConditions.Builder()
             .build()
-        englishIndonesianTranslator.downloadModelIfNeeded()
-        if (!listFoodSuggest.isEmpty()) {
-            englishIndonesianTranslator.translate(listFoodSuggest.get(position).name.toString())
-                .addOnSuccessListener {
-                    listFoodSuggest.get(position).name = it.toString()
-                    Log.d("TAG", "getFoodSuggestion: ${listFoodSuggest.get(position).name.trim()}")
-                    holder.titleText.text = listFoodSuggest.get(position).name
-                }
-            englishIndonesianTranslator.translate(listFoodSuggest.get(position).description.toString())
-                .addOnSuccessListener {
-                    listFoodSuggest.get(position).description = it.toString().toLowerCase()
-                    Log.d("TAG", "getFoodSuggestion: ${listFoodSuggest.get(position).description.trim()}")
-                    holder.descText.text = listFoodSuggest.get(position).description
-                }
-                .addOnFailureListener {
-                    Log.d("TAG", "onBindViewHolder: ${it.localizedMessage?.trim()}")
-                    Log.d("TAG", "onBindViewHolder: ${it.message?.trim()}")
-                }
-        }
+        holder.titleText.text = listFoodSuggest.get(position).name
+        holder.descText.text = listFoodSuggest.get(position).description
+//        englishIndonesianTranslator.downloadModelIfNeeded()
+//        if (!listFoodSuggest.isEmpty()) {
+//            englishIndonesianTranslator.translate(listFoodSuggest.get(position).name.toString())
+//                .addOnSuccessListener {
+//                    listFoodSuggest.get(position).name = it.toString()
+//                    Log.d("TAG", "getFoodSuggestion: ${listFoodSuggest.get(position).name.trim()}")
+//                    holder.titleText.text = listFoodSuggest.get(position).name
+//                }
+//            englishIndonesianTranslator.translate(listFoodSuggest.get(position).description.toString())
+//                .addOnSuccessListener {
+//                    listFoodSuggest.get(position).description = it.toString().toLowerCase()
+//                    Log.d("TAG", "getFoodSuggestion: ${listFoodSuggest.get(position).description.trim()}")
+//                    holder.descText.text = listFoodSuggest.get(position).description
+//                }
+//                .addOnFailureListener {
+//                    Log.d("TAG", "onBindViewHolder: ${it.localizedMessage?.trim()}")
+//                    Log.d("TAG", "onBindViewHolder: ${it.message?.trim()}")
+//                }
+//        }
+        Log.d("TAG", "onBindViewHolder: ${listFoodSuggest.get(1).ingredients.size}")
         holder.itemView.setOnClickListener {
             onClickListener?.onClick(position, listFoodSuggest.get(position))
         }

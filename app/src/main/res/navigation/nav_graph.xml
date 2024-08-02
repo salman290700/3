@@ -8,6 +8,15 @@
         app:destination="@id/trackingFragment"
         app:launchSingleTop="true"
         />
+    <action android:id="@+id/action_detailFoodSug"
+        app:destination="@id/DetailfoodSugFragment"
+        app:launchSingleTop="true"
+        />
+
+    <fragment
+        android:id="@+id/DetailfoodSugFragment"
+        android:name="com.example.dietjoggingapp.ui.Fragments.DetailfoodSugFragment"
+        android:label="Detail Food Suggest"/>
     <action android:id="@+id/action_global_homeFragment"
         app:destination="@id/trackingFragment"
         app:launchSingleTop="true"

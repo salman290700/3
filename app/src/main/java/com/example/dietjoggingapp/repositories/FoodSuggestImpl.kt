@@ -178,7 +178,7 @@ class FoodSuggestImpl: FoodSuggestRepo {
                                 var name = jsonObject.get("name")
                                 var desc = jsonObject.get("description")
                                 var ingredients: JSONArray = jsonObject.getJSONArray("ingredients")
-                                var steps: JSONArray = jsonObject.getJSONArray(    "steps")
+                                var steps: JSONArray = jsonObject.getJSONArray("steps")
                                 var image = jsonObject.get("image").toString().trim()
                                 Log.d("TAG", "onResponse: iamge ${image}")
                                 var foodSuggest = FoodSuggest()
@@ -193,6 +193,8 @@ class FoodSuggestImpl: FoodSuggestRepo {
                                     var servingSizeObj = ingredientJsonObject.getJSONObject("servingSize")
                                     Log.d("TAG", "onResponse servingSize: ${servingSizeObj.toString().trim()}")
                                     var servingSize = ServingSize()
+                                    var ingrName = ingredientJsonObject.get("name").toString()
+                                    Log.d("TAG", "getFoodSuggestion: ${ingrName}")
                                     var desc = servingSizeObj.get("desc")?.toString()
                                     var grams: Float? = null;
                                     if(servingSizeObj.has("grams")) {
@@ -220,6 +222,7 @@ class FoodSuggestImpl: FoodSuggestRepo {
                                     if(units?.isNotEmpty() == true) {
                                         servingSize.units = units
                                         ingredient.servingSize = servingSize
+                                        ingredient.name = ingrName
                                         listIngredient.add(ingredient)
                                     }
                                 }

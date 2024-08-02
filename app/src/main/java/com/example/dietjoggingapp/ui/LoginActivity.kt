@@ -13,6 +13,7 @@ import com.example.dietjoggingapp.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
@@ -31,6 +32,7 @@ class LoginActivity : AppCompatActivity() {
             val intent: Intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
+
     }
 
     private fun signInEmail(email: String, password: String){
