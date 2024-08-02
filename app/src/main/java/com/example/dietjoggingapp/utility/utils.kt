@@ -9,8 +9,13 @@ class utils {
         fun countDietDays(CalDef: Float, maxWeight: Float, weight: Float, bmr: Float): Int {
             var DT = 0.0f;
             var ow = weight - maxWeight
-            DT = (ow / 7700) / (bmr - CalDef)
-            return DT.roundToInt()
+            if (ow > 0) {
+                DT = (ow / 7700) / (bmr - CalDef)
+                return DT.roundToInt()
+            }else {
+                DT = 0.0f
+                return DT.roundToInt()
+            }
         }
     }
 }

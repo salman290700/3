@@ -84,6 +84,17 @@ class HomeFragment : Fragment() {
                 binding.tvTallincm.text = (user?.height!! * 10.0f).toBigDecimal().setScale(1).toString()
                 countOW()
                 countJogSug()
+                var CALDEF = CalDef()
+                var calDef = 0.0f
+                    database.collection("CALDEF").document(user?.email.toString()).get()
+                    .addOnCompleteListener {
+                        CALDEF = it.result.toObject(CalDef::class.java)!!
+                        calDef = CALDEF.caldef
+                        binding.tvDiet.text = "${utils.countDietDays(calDef, user.maxWeight, user.weight, user.bmr)} Hari"
+                    }.addOnFailureListener{
+
+                    }
+
             }.addOnFailureListener {
                 Log.d("TAG", "onResume: ${it.message.toString()}")
                 Log.d("TAG", "onResume: ${it.localizedMessage.toString()}")

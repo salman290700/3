@@ -67,6 +67,24 @@
                 android:textStyle="bold"
                 android:id="@+id/tvJogSug"
                 />
+            <TextView
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Anda perlu melakukan diet selama  "
+                android:textColor="@color/white"
+                android:gravity="center"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="28 Hari"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="@dimen/_20ssp"
+                android:textStyle="bold"
+                android:id="@+id/tvDiet"
+                />
         </LinearLayout>
         <LinearLayout
             android:id="@+id/joggingSuggestionLayout"
