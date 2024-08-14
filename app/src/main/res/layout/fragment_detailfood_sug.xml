@@ -47,6 +47,13 @@
                 android:text="Steps"
                 android:textColor="@color/white"
                 />
+            <Button
+                android:id="@+id/btnPilih"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_20sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:text="Choose This!!" />
         </LinearLayout>
     </ScrollView>
     <!-- TODO: Update blank fragment layout -->

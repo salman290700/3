@@ -53,25 +53,8 @@
                 android:layout_marginTop="@dimen/_10sdp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Anda perlu jogging "
-                android:textColor="@color/white"
-                android:gravity="center"
-                />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="20 menit"
-                android:textColor="@color/white"
-                android:gravity="center"
-                android:textSize="@dimen/_20ssp"
-                android:textStyle="bold"
-                android:id="@+id/tvJogSug"
-                />
-            <TextView
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Anda perlu melakukan diet selama  "
+                android:text="Anda perlu melakukan Diet &amp; Jogging selama  "
+                android:id="@+id/tvDT"
                 android:textColor="@color/white"
                 android:gravity="center"
                 />
@@ -84,6 +67,45 @@
                 android:textSize="@dimen/_20ssp"
                 android:textStyle="bold"
                 android:id="@+id/tvDiet"
+                />
+            <TextView
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Target joging per hari "
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:id="@+id/tvjog"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="20 menit"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="@dimen/_20ssp"
+                android:textStyle="bold"
+                android:id="@+id/tvJogSug"
+                />
+
+            <TextView
+                android:id="@+id/tvTarget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:gravity="center"
+                android:text="Saran konsumsi makanan"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1500 Kalori"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="@dimen/_20ssp"
+                android:textStyle="bold"
+                android:id="@+id/tvTargetKalori"
                 />
         </LinearLayout>
         <LinearLayout
@@ -112,7 +134,7 @@
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
                         android:textAlignment="textStart"
-                        android:text="Berat Badan"/>
+                        android:text="Berat badan"/>
                 </TableRow>
                 <TableRow
                     android:layout_marginTop="@dimen/_8sdp">
@@ -122,7 +144,7 @@
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
                         android:textAlignment="textStart"
-                        android:text="Tinggi Badan"/>
+                        android:text="Tinggi badan"/>
                 </TableRow>
 
                 <TableRow
@@ -140,11 +162,11 @@
                     android:layout_marginTop="@dimen/_8sdp">
                     <TextView
                         android:layout_width="@dimen/_100sdp"
-                        android:layout_height="@dimen/_14sdp"
+                        android:layout_height="@dimen/_32sdp"
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
                         android:textAlignment="textStart"
-                        android:text="Kebutuhan Kalori"/>
+                        android:text="Kebutuhan kalori \nper hari"/>
                 </TableRow>
             </TableLayout>
 
@@ -191,10 +213,11 @@
                     android:layout_marginTop="@dimen/_8sdp">
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/_14sdp"
+                        android:layout_height="@dimen/_32sdp"
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
-                        android:textAlignment="textStart"
+                        android:gravity="center"
+
                         android:text=":"/>
                 </TableRow>
             </TableLayout>
@@ -246,10 +269,10 @@
                     <TextView
                         android:id="@+id/tvbmr"
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/_14sdp"
+                        android:layout_height="@dimen/_32sdp"
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
-                        android:textAlignment="textStart"
+                        android:gravity="center"
                         android:text="1800"/>
                 </TableRow>
             </TableLayout>
@@ -269,7 +292,7 @@
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
                         android:textAlignment="textStart"
-                        android:text="Kg"/>
+                        android:text="kg"/>
                 </TableRow>
                 <TableRow
                     android:layout_marginTop="@dimen/_8sdp">
@@ -279,7 +302,7 @@
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
                         android:textAlignment="textStart"
-                        android:text="Cm"/>
+                        android:text="cm"/>
                 </TableRow>
                 <TableRow
                     android:layout_marginTop="@dimen/_8sdp">
@@ -289,18 +312,19 @@
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
                         android:textAlignment="textStart"
-                        android:text="Tahun"/>
+                        android:text="tahun"/>
                 </TableRow>
 
                 <TableRow
                     android:layout_marginTop="@dimen/_8sdp">
                     <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="@dimen/_14sdp"
+                        android:layout_height="@dimen/_32sdp"
                         android:textSize="@dimen/_12sdp"
                         android:textColor="@color/white"
-                        android:textAlignment="textStart"
-                        android:text="Kcal"/>
+                        android:gravity="center"
+                        android:layout_gravity="left"
+                        android:text="kcal"/>
                 </TableRow>
             </TableLayout>
         </LinearLayout>
@@ -319,13 +343,6 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 >
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="You need to Go Jogging For"
-                    android:textColor="@color/white"
-                    android:layout_marginRight="@dimen/_4sdp"
-                    />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

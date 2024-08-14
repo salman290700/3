@@ -110,7 +110,6 @@ class FoodSuggestAdapter: RecyclerView.Adapter<FoodSuggestAdapter.FoodSuggestVie
     }
 
     interface RecyclerViewClickListener {
-
         // method yang akan dipanggil di MainActivity
         fun onItemClicked(view: View, foodSuggest: FoodSuggest)
 

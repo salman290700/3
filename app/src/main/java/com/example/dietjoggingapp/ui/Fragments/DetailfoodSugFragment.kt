@@ -1,6 +1,5 @@
 package com.example.dietjoggingapp.ui.Fragments
 
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -9,16 +8,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
+import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
+import com.example.dietjoggingapp.database.Fooddiet
 import com.example.dietjoggingapp.database.Ingredients
+import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.database.domains.Step
 import com.example.dietjoggingapp.database.foodsugser
 import com.example.dietjoggingapp.databinding.FragmentDetailfoodSugBinding
-import com.google.api.Distribution.BucketOptions.Linear
+import com.example.dietjoggingapp.utility.toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.util.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,6 +39,7 @@ class DetailfoodSugFragment : Fragment() {
     var ingr = ""
     private var steps: MutableList<Step> = mutableListOf()
     var Step = ""
+    val auth = FirebaseAuth.getInstance().currentUser?.email.toString()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -64,6 +67,89 @@ class DetailfoodSugFragment : Fragment() {
 
         binding.tvfoodname.text = foodSuggest.name
         binding.tvfooddesc.text = foodSuggest.desc
+        happyDiet()
+    }
+
+    private fun happyDiet() {
+        val database = FirebaseFirestore.getInstance()
+        database.collection("USERS").document(auth).get()
+            .addOnCompleteListener {
+                val user = it.result.toObject(User::class.java)
+                val bmr = user?.bmr!!.toFloat()
+                database.collection("FOODDIET").document(auth).get()
+                    .addOnCompleteListener {
+
+                        if(it.result.toObject(Fooddiet::class.java) == null) {
+                            val fodiet = Fooddiet(user.email, 0.0f)
+                            database.collection("FOODDIET").document(auth).set(fodiet)
+                        }else {
+                            val fooddiet = it.result.toObject(Fooddiet::class.java)
+                            Log.d("TAG", "happyDiet: ${fooddiet!!.calorie}")
+                            val cal  = fooddiet?.calorie!! + foodSuggest?.calorie!!.toFloat()
+                            if(cal!! >= bmr) {
+                                binding.btnPilih.visibility = View.INVISIBLE
+                            }
+                        }
+                    }
+            }
+        binding.btnPilih.setOnClickListener {
+            updateFoodDiet()
+        }
+    }
+
+    private fun updateFoodDiet() {
+        val auth = FirebaseAuth.getInstance().currentUser?.email.toString()
+        val database = FirebaseFirestore.getInstance()
+        val calendar = Calendar.getInstance()
+        val current = calendar.get(Calendar.HOUR_OF_DAY)
+        var  string = ""
+        if(current >= 0 && current <= 12) {
+            string = "makan pagi"
+        } else if(current >= 12 && current <= 18) {
+            string = "makan siang"
+        } else {
+            string = "makan malam"
+        }
+        toast("Selamat diet ${string} anda berhasil")
+        val foodDiet = Fooddiet(auth, foodSuggest.calorie)
+        database.collection("FOODDIET").document(auth).get()
+            .addOnCompleteListener {
+                if(it.result.toObject(Fooddiet::class.java) == null) {
+                    database.collection("FOODDIET").document(auth).set(foodDiet)
+                        .addOnFailureListener {
+                            toast("error : :${it.localizedMessage.toString()}")
+                            toast("error : :${it.message.toString()}")
+                        }
+                } else {
+                    var food = it.result.toObject(Fooddiet::class.java)
+                    if(food?.date == "${Date().year}-${Date().month}-${Date().date}") {
+                        food.calorie = foodDiet.calorie!! + (food.calorie!!)
+                        Log.d("TAG", "updateFoodDietCalorie: ${food.calorie}")
+                        database.collection("FOODDIET").document(auth).update("calorie", food.calorie)
+                            .addOnCompleteListener { 
+                                if (it.result != null) {
+                                    Log.d("TAG", "updateFoodDiet: ${it.result.toString()}")
+                                    Log.d("TAG", "updateFoodDiet: ${food.calorie}")
+                                }
+                            }
+                            .addOnFailureListener {
+                                toast("error : :${it.localizedMessage.toString()}")
+                                toast("error : :${it.message.toString()}")
+                            }
+                    }else {
+                        database.collection("FOODDIET").document(auth).set(foodDiet).addOnFailureListener {
+                            toast(it.localizedMessage.toString())
+                            toast(it.message.toString())
+                        }
+                    }
+                }
+                findNavController().navigate(R.id.action_home)
+            }
+            .addOnFailureListener {
+                toast("error : :${it.localizedMessage.toString()}")
+                toast("error : :${it.message.toString()}")
+            }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

@@ -11,11 +11,13 @@ import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.databinding.ActivityRegisterBinding
 import com.example.dietjoggingapp.other.Constants
 import com.example.dietjoggingapp.other.registerUtils
+import com.example.dietjoggingapp.utility.utils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.StorageReference
 import java.math.RoundingMode
 import java.util.Calendar
+import kotlin.math.max
 
 class RegisterActivity : AppCompatActivity() {
     private var auth = FirebaseAuth.getInstance()
@@ -54,7 +56,11 @@ class RegisterActivity : AppCompatActivity() {
         binding.btnRegister.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
-            registerUser(email, password, setUser(ageYear, ageMonth, ageDay))
+            if (utils.ageInYear(ageYear, ageMonth, ageDay) < 18) {
+                Toast.makeText(this, "Anda belum cukup Umur", Toast.LENGTH_SHORT).show()
+            }else {
+                registerUser(email, password, setUser(ageYear, ageMonth, ageDay))
+            }
         }
 //        Setup tvLogin
         binding.addPicture.setOnClickListener {
@@ -111,7 +117,7 @@ class RegisterActivity : AppCompatActivity() {
 
         if(binding.rbMale.isChecked) {
             gender = "male"
-        } else {
+        } else if(binding.rbFemale.isChecked) {
             gender = "female"
         }
 //        val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
@@ -122,18 +128,18 @@ class RegisterActivity : AppCompatActivity() {
 //        }
 
         ageInYear = registerUtils.ageInYear(year, month, day)
-        if(ageInYear < 18) {
-            Toast.makeText(this, "Anda belum cukup umur", Toast.LENGTH_LONG).show()
-        }
-        bmr = dailyCalorie(weight, height, age)
+
+        Log.d("TAG", "setUser: ${gender}")
+        bmr = utils.bmr(gender, weight, height * 100, age, utils.bmi(height, weight))
         Log.d("TAG", "setUser: ${bmr}")
         overWeight = ow(weight, height)
         Log.d("TAG", "setUser: ${bmr}")
         Log.d("TAG", "setUser: ${registerUtils.ageInYear(ageYear, ageMonth, ageDay)}")
+        val bmi = utils.bmi(height, weight)
         user = User(userId = "",
             fullName = name,
             email = email,
-            dailyCalorie = bmr,
+            dailyCalorie = utils.dailyCalorie(gender, weight, height, age),
             bmr = bmr,
             weight = weight,
             height = height,
@@ -142,10 +148,12 @@ class RegisterActivity : AppCompatActivity() {
             calDef = calDef(weight, height, age),
             overweight = overWeight,
             maxWeight = maxWeight(height),
-            maxCalPerServe = calDef(weight, height, age)/3,
+            maxCalPerServe = utils.maxCalPerServe(gender, weight, height * 100, age, bmi),
             birthDate = ageDay,
             birthMonth = ageMonth,
-            birthYear = ageYear)
+            birthYear = ageYear,
+            bmi = utils.bmi(height, weight)
+        )
         Log.d("TAG", "setUser: ${user.toString().trim()}")
         return user
     }
@@ -163,11 +171,14 @@ class RegisterActivity : AppCompatActivity() {
             gender = "female"
         }
         if(gender == "male") {
-            bmr = 66 + 13.7f * (weight * 2.2f) + 5.0f * (height * 2.54f) - 6.78f * age.toFloat()
+            bmr = 66 + 13.7f * (weight) + 5.0f * (height) - 6.78f * age.toFloat()
+            Log.d("TAG", "dailyCalorie: ${bmr}")
+            return bmr
         } else {
-            bmr = 66 + 9.6f * (weight * 2.2f) + 1.8f * (height * 2.54f) - 4.7f * age.toFloat()
+            bmr = 66 + 9.6f * (weight) + 1.8f * (height) - 4.7f * age.toFloat()
+            Log.d("TAG", "dailyCalorie: ${bmr}")
+            return bmr
         }
-        return bmr
     }
 
     private fun calDef(weight: Float, height: Float, age: Int): Float {
@@ -176,23 +187,26 @@ class RegisterActivity : AppCompatActivity() {
     }
     private fun ow(weight: Float, height: Float): Float {
         val bmi = weight/(height*height)
+        Log.d("TAG", "ow: ${bmi}")
         var ow = 0.0f
-        val maxweight: Float = (height * height) * 25
+        val maxweight: Float = maxWeight(height)
+        Log.d("TAG", "ow: ${maxweight}")
+        Log.d("TAG", "ow: ${bmr}")
         if (bmi > 25) {
             Log.d("Tgas", "ow: ${maxweight.toString().trim()}")
             ow = weight - maxweight
             Log.d("Tgas", "ow: ${ow.toString().trim()}")
             bmr = bmr - (10%bmr)
+            return ow
         }else if (bmi < 18){
-            bmr = bmr + (10%bmr)
+            bmr = bmr + (20%bmr)
             ow = 0.0f
+            return ow
         }else {
             bmr = bmr
             ow = 0.0f
+            return ow
         }
-        Log.d("Tgas", "ow: ${maxweight.toString().trim()}")
-        Log.d("Tgas", "ow: ${ow.toString().trim()}")
-        return ow
     }
 
     private fun maxWeight(height: Float) : Float {

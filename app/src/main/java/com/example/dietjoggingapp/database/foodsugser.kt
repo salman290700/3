@@ -14,5 +14,6 @@ data class foodsugser(
     var desc: String? = "",
     var steps: MutableList<Step> = mutableListOf(),
     var image: String = "",
-    var ingredients: MutableList<Ingredients> = mutableListOf()
+    var ingredients: MutableList<Ingredients> = mutableListOf(),
+    var calorie: Float? = 0.0f
 ): Parcelable

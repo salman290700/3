@@ -73,8 +73,13 @@ class AccountDetailFragment : Fragment() {
             binding.tvWeight.text = weight.toString().trim()
             binding.tvTallInCm.text = tallInCm.toString().trim()
             binding.tvbirthdate.text = "${user.birthDate} - ${user.birthMonth} - ${user.birthYear}"
-            binding.tvage.text =
-                registerUtils.ageInYear(user.birthYear, user.birthMonth, user.birthDate).toString()
+            binding.tvage.text = registerUtils.ageInYear(user.birthYear, user.birthMonth, user.birthDate).toString()
+            if(user.gender == "male") {
+                binding.tvgender.text = "laki-laki"
+            }else {
+                binding.tvgender.text = "perempuan"
+            }
+
         }.addOnFailureListener {
             Log.d("TAG", "initUserValue: ${it.toString().trim()}")
         }

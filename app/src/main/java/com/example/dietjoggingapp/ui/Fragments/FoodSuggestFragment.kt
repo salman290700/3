@@ -1,5 +1,6 @@
 package com.example.dietjoggingapp.ui.Fragments
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,13 +14,21 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.adapters.FoodSuggestAdapter
+import com.example.dietjoggingapp.database.Fooddiet
 import com.example.dietjoggingapp.database.Ingredients
+import com.example.dietjoggingapp.database.User
 import com.example.dietjoggingapp.database.domains.FoodSuggest
 import com.example.dietjoggingapp.database.foodsugser
 import com.example.dietjoggingapp.databinding.FragmentFoodSuggestBinding
 import com.example.dietjoggingapp.other.UiState
+import com.example.dietjoggingapp.ui.LoginActivity
+import com.example.dietjoggingapp.ui.MainActivity
 import com.example.dietjoggingapp.ui.viewmodels.FoodSuggestViewModel
+import com.example.dietjoggingapp.utility.toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.roundToInt
 
 
 @AndroidEntryPoint
@@ -53,26 +62,83 @@ class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest), FoodSugges
         super.onViewCreated(view, savedInstanceState)
         val url = "https://low-carb-recipes.p.rapidapi.com/search?tags=low-carb&maxAddedSugar=0&limit=5"
         val context = activity?.baseContext
-        viewModel.getFoodSuggest(context!!, url)
-        val rvFood = binding.rvFoodSuggest
+        val user = FirebaseAuth.getInstance().currentUser?.email.toString()
+        val database = FirebaseFirestore.getInstance()
+        var maxCalPerServe = 0.0f
+        database.collection("USERS").document(user).get()
+            .addOnCompleteListener {
+                val userData = it.result.toObject(User::class.java)
 
-        binding.rvFoodSuggest.adapter = foodSuggestadapter
-        viewModel.getFoodSuggest.observe(viewLifecycleOwner, Observer { state ->
-            when(state){
-                is UiState.Loading ->{
+                if(userData != null) {
+                    database.collection("FOODDIET").document(user).get()
+                        .addOnCompleteListener {
+                            val foodDiet = it.result.toObject(Fooddiet::class.java)
+                            if(foodDiet == null || foodDiet?.calorie?.roundToInt() == 0) {
+                                maxCalPerServe = userData.maxCalPerServe
 
+                                viewModel.getFoodSuggest(context!!, url, maxCalPerServe, userData?.bmi!!)
+                                val rvFood = binding.rvFoodSuggest
+
+                                binding.rvFoodSuggest.adapter = foodSuggestadapter
+                                viewModel.getFoodSuggest.observe(viewLifecycleOwner, Observer { state ->
+                                    when(state){
+                                        is UiState.Loading ->{
+
+                                        }
+                                        is UiState.failure -> {
+                                            Log.d("TAG", "onViewCreated: ${state.error}")
+                                            Log.d("TAG", "onViewCreated: ${state.error}")
+                                            toast(state.error)
+                                            findNavController().navigate(R.id.action_home)
+                                        }
+                                        is UiState.Success -> {
+                                            foodSuggestadapter.submitList(state.data.toMutableList())
+                                            Log.d(TAG, "onViewCreated: ${state.data.get(0).toString().trim()}")
+                                        }
+                                    }
+                                })
+
+                                foodSuggestadapter.listener = this
+                            }else {
+                                maxCalPerServe = userData?.bmr!! - foodDiet.calorie!!.toFloat()
+                                if (maxCalPerServe <= 0) {
+                                    toast("Anda tidak bisa makan lagi")
+                                    val intent = Intent(requireActivity(), MainActivity::class.java)
+                                    startActivity(intent)
+                                }
+                                viewModel.getFoodSuggest(context!!, url, maxCalPerServe, userData?.bmi!!)
+                                val rvFood = binding.rvFoodSuggest
+
+                                binding.rvFoodSuggest.adapter = foodSuggestadapter
+                                viewModel.getFoodSuggest.observe(viewLifecycleOwner, Observer { state ->
+                                    when(state){
+                                        is UiState.Loading ->{
+
+                                        }
+                                        is UiState.failure -> {
+                                            Log.d("TAG", "onViewCreated: ${state.error}")
+                                            toast(state.error)
+                                            findNavController().navigate(R.id.action_home)
+                                        }
+                                        is UiState.Success -> {
+                                            foodSuggestadapter.submitList(state.data.toMutableList())
+                                            Log.d(TAG, "onViewCreated: ${state.data.get(0).toString().trim()}")
+                                        }
+                                    }
+                                })
+
+                                foodSuggestadapter.listener = this
+                            }
+                        }
                 }
-                is UiState.failure -> {
-                    Log.d("TAG", "onViewCreated: ${state.error}")
-                }
-                is UiState.Success -> {
-                    foodSuggestadapter.submitList(state.data.toMutableList())
-                    Log.d(TAG, "onViewCreated: ${state.data.get(0).toString().trim()}")
-                }
+            }.addOnFailureListener {
+                toast("${it.localizedMessage.toString()}")
+                toast("${it.message.toString()}")
+                val intent = Intent(requireActivity(), LoginActivity::class.java)
+                startActivity(intent)
             }
-        })
+        Log.d("TAG", "onViewCreated foodrec: ${maxCalPerServe}")
 
-        foodSuggestadapter.listener = this
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -92,8 +158,9 @@ class FoodSuggestFragment : Fragment(R.layout.fragment_food_suggest), FoodSugges
             ingredients.add(i, ingredient)
             Log.d("TAG", "onItemClicked: ${ingredient.toString().trim()}")
         }
+        Log.d(TAG, "onItemClicked: ${foodSuggest.nutrients.caloriesKCal}")
 
-        val foodSuggestSer = foodsugser(foodSuggest.id, name, desc, foodSuggest.steps, image, ingredients)
+        val foodSuggestSer = foodsugser(foodSuggest.id, name, desc, foodSuggest.steps, image, ingredients, foodSuggest.nutrients.caloriesKCal!!)
         val bundle = Bundle()
         bundle.putParcelable("foodSuggest", foodSuggestSer)
         val fragment = DetailfoodSugFragment()

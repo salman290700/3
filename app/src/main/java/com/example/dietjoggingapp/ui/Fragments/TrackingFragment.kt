@@ -69,6 +69,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.Map
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListener, EasyPermissions.PermissionCallbacks {
@@ -317,123 +318,128 @@ class TrackingFragment: Fragment(R.layout.fragment_tracking), SensorEventListene
             for(polyline in pathPoints) {
                 distanceInMeter += TrackingUtil.calculatePolilyneDistance(polyline)
             }
-
-            if (data != null) {
-                var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
-                val dateTimeStamp = Calendar.getInstance().timeInMillis
+            if (distanceInMeter.roundToInt() == 0) {
+                toast("Jogging cancelled")
+                val intent = Intent(requireActivity(), MainActivity::class.java)
+                startActivity(intent)
+            }else {
+                if (data != null) {
+                    var avgSpeed = round((distanceInMeter / 1000f) / (currentTimeInMilliseconds / 1000f / 60 / 60 ) * 10 ) / 10f
+                    val dateTimeStamp = Calendar.getInstance().timeInMillis
 //                val caloriesBurned = ((distanceInMeter / 1000f) * user.weight) * 2.8f
 
-                val caloriesBurned = (((2.8f * 7.7f * ((user.weight * 100) * 2.2f)) / 200) * ((currentTimeInMilliseconds / 1000) / 60)).toBigDecimal().setScale(2, RoundingMode.DOWN).toFloat()
-                this.distanceInMeter = distanceInMeter
-                this.jogging = jogging
-                this.dateTimeStamp = dateTimeStamp
-                this.caloriesBurned = caloriesBurned
-                this.avgSpeed = avgSpeed
-                this.bitmap = ""
-                val documentDaillyCalorie = auth!!.email?.let { database.collection("USERS").document(it) }
-                var dailyCalories = DailyCalories()
-                var calorie = 0f
-                var caldef = CalDef(user.email, caloriesBurned)
-                database.collection("CALDEF").document(user.email).get()
-                    .addOnCompleteListener {
-                        if(it.result == null) {
-                            database.collection("CALDEF").document(user.email).set(caldef)
-                                .addOnCompleteListener {
-                                    toast("Update data Calorie Defisit Berhasil")
-                                }.addOnFailureListener {
-                                    toast("update data Calorie Deficit Gagal")
-                                }
-                        }else {
-                            var caldef = it.result.toObject(CalDef::class.java)
-
-                            if (caldef?.date == "${Date().year} ${Date().month} ${Date().date}") {
-                                var Caldef = caldef!!.caldef!!.toFloat()
-                                Caldef = Caldef + caloriesBurned
-                                var updateCaldef: HashMap<String, Any> = HashMap()
-                                updateCaldef.put("ca;def", Caldef)
-                                var date = "${Date().year} ${Date().month} ${Date().date}"
-                                updateCaldef.put("date", date)
-                                database.collection("CalDef").document(user.email).update("caldef", Caldef)
+                    val caloriesBurned = (((2.8f * 7.7f * ((user.weight * 100) * 2.2f)) / 200) * ((currentTimeInMilliseconds / 1000) / 60)).toBigDecimal().setScale(2, RoundingMode.DOWN).toFloat()
+                    this.distanceInMeter = distanceInMeter
+                    this.jogging = jogging
+                    this.dateTimeStamp = dateTimeStamp
+                    this.caloriesBurned = caloriesBurned
+                    this.avgSpeed = avgSpeed
+                    this.bitmap = ""
+                    val documentDaillyCalorie = auth!!.email?.let { database.collection("USERS").document(it) }
+                    var dailyCalories = DailyCalories()
+                    var calorie = 0f
+                    var caldef = CalDef(user.email, caloriesBurned)
+                    database.collection("CALDEF").document(user.email).get()
+                        .addOnCompleteListener {
+                            if(it.result == null) {
+                                database.collection("CALDEF").document(user.email).set(caldef)
+                                    .addOnCompleteListener {
+                                        toast("Update data Calorie Defisit Berhasil")
+                                    }.addOnFailureListener {
+                                        toast("update data Calorie Deficit Gagal")
+                                    }
                             }else {
-                                var Caldef = caloriesBurned
-                                var updateCaldef: HashMap<String, Any> = HashMap()
-                                updateCaldef.put("ca;def", Caldef)
-                                updateCaldef.put("date", Date())
-                                database.collection("CalDef").document(user.email).update("caldef", Caldef)
+                                var caldef = it.result.toObject(CalDef::class.java)
+
+                                if (caldef?.date == "${Date().year} ${Date().month} ${Date().date}") {
+                                    var Caldef = caldef!!.caldef!!.toFloat()
+                                    Caldef = Caldef + caloriesBurned
+                                    var updateCaldef: HashMap<String, Any> = HashMap()
+                                    updateCaldef.put("ca;def", Caldef)
+                                    var date = "${Date().year} ${Date().month} ${Date().date}"
+                                    updateCaldef.put("date", date)
+                                    database.collection("CalDef").document(user.email).update("caldef", Caldef)
+                                }else {
+                                    var Caldef = caloriesBurned
+                                    var updateCaldef: HashMap<String, Any> = HashMap()
+                                    updateCaldef.put("ca;def", Caldef)
+                                    updateCaldef.put("date", Date())
+                                    database.collection("CalDef").document(user.email).update("caldef", Caldef)
+                                }
                             }
                         }
-                    }
-                    .addOnFailureListener {
-                        toast("${it.localizedMessage.toString()}")
-                        toast("${it.message.toString()}")
-                    }
-                documentDaillyCalorie!!.get().addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        val documentSnapshot = it.result
-                        var dailyCalories = documentSnapshot.toObject(User::class.java)!!
-                        calorie = dailyCalories.dailyCalorie - caloriesBurned
-
-                        dailyCalories.dailyCalorie = calorie
-                        documentDaillyCalorie?.update("dailyCalorie", dailyCalories.dailyCalorie)!!.addOnCompleteListener {
-
-                        }.addOnFailureListener {
-                            Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
+                        .addOnFailureListener {
+                            toast("${it.localizedMessage.toString()}")
+                            toast("${it.message.toString()}")
                         }
+                    documentDaillyCalorie!!.get().addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val documentSnapshot = it.result
+                            var dailyCalories = documentSnapshot.toObject(User::class.java)!!
+                            calorie = dailyCalories.dailyCalorie - caloriesBurned
+
+                            dailyCalories.dailyCalorie = calorie
+                            documentDaillyCalorie?.update("dailyCalorie", dailyCalories.dailyCalorie)!!.addOnCompleteListener {
+
+                            }.addOnFailureListener {
+                                Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
+                            }
+                        }
+                    }.addOnFailureListener {
+                        Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
                     }
-                }.addOnFailureListener {
-                    Toast.makeText(requireActivity(), it.localizedMessage, Toast.LENGTH_SHORT)
-                }
-                fOut.flush()
-                fOut.close()
+                    fOut.flush()
+                    fOut.close()
 
-                Log.d("TAG", "getJogging: currentTimeInMillis" + this.currentTimeInMilliseconds.toString().trim())
-                Log.d("TAG", "getJogging: calories burned" + this.caloriesBurned.toString().trim())
-                Log.d("TAG", "getJogging: dateTimeStamp" + this.dateTimeStamp.toString().trim())
-                Log.d("TAG", "getJogging: user weight" + user.weight.toString().trim())
-                Log.d("TAG", "getJogging: distancen in meter" + this.distanceInMeter.toString().trim())
-                Log.d("TAG", "getJogging: bitmap" + this.bitmap.toString().trim())
-                Log.d("TAG", "getJogging: distance in meter" + distanceInMeter.toString().trim())
-                jogging = Jogging("", auth.uid, "", this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
-                Log.d("TAG", "getJogging: jogging test ${this.jogging?.caloriesBurned.toString().trim() }}")
-                Log.d("TAG", "getJogging: return ${this.jogging?.caloriesBurned.toString().trim()}")
+                    Log.d("TAG", "getJogging: currentTimeInMillis" + this.currentTimeInMilliseconds.toString().trim())
+                    Log.d("TAG", "getJogging: calories burned" + this.caloriesBurned.toString().trim())
+                    Log.d("TAG", "getJogging: dateTimeStamp" + this.dateTimeStamp.toString().trim())
+                    Log.d("TAG", "getJogging: user weight" + user.weight.toString().trim())
+                    Log.d("TAG", "getJogging: distancen in meter" + this.distanceInMeter.toString().trim())
+                    Log.d("TAG", "getJogging: bitmap" + this.bitmap.toString().trim())
+                    Log.d("TAG", "getJogging: distance in meter" + distanceInMeter.toString().trim())
+                    jogging = Jogging("", auth.uid, "", this.dateTimeStamp, this.avgSpeed, this.distanceInMeter, this.currentTimeInMilliseconds,this.caloriesBurned)
+                    Log.d("TAG", "getJogging: jogging test ${this.jogging?.caloriesBurned.toString().trim() }}")
+                    Log.d("TAG", "getJogging: return ${this.jogging?.caloriesBurned.toString().trim()}")
 
-                val document = database.collection(Constants.FirestoreTable.JOGGING).document()
+                    val document = database.collection(Constants.FirestoreTable.JOGGING).document()
 
-                if (jogging != null) {
-                    jogging?.id = document.id
-                    document.set(jogging!!)
-                        .addOnSuccessListener {
-                            var storage = FirebaseStorage.getInstance().getReference("photo/jogging/${user.userId}/${document.id}.png")
-                            storage.putBytes(data)
-                                .addOnCompleteListener {
-                                    if (it.isSuccessful) {
-                                        storage.downloadUrl
-                                            .addOnCompleteListener {
-                                                var imageUrl = it.result.toString()
-                                                val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
-                                                document2.update("img", imageUrl)
-                                                Log.d("TAG", "getJogging: url ${imageUrl}")
-                                            }
-                                    } else {
-                                        Log.d("TAG", "getJogging: Image upload task is not successfull")
+                    if (jogging != null) {
+                        jogging?.id = document.id
+                        document.set(jogging!!)
+                            .addOnSuccessListener {
+                                var storage = FirebaseStorage.getInstance().getReference("photo/jogging/${user.userId}/${document.id}.png")
+                                storage.putBytes(data)
+                                    .addOnCompleteListener {
+                                        if (it.isSuccessful) {
+                                            storage.downloadUrl
+                                                .addOnCompleteListener {
+                                                    var imageUrl = it.result.toString()
+                                                    val document2 = database.collection(Constants.FirestoreTable.JOGGING).document(document.id)
+                                                    document2.update("img", imageUrl)
+                                                    Log.d("TAG", "getJogging: url ${imageUrl}")
+                                                }
+                                        } else {
+                                            Log.d("TAG", "getJogging: Image upload task is not successfull")
+                                        }
                                     }
-                                }
-                            toast("Success")
-                            Log.d("TAG", "getJogging: Success Save gmbar")
-                        }
-                        .addOnFailureListener{
-                            Toast.makeText(activity?.applicationContext, "Error : ${it.toString().trim()}", Toast.LENGTH_SHORT)
-                        }
-                    Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
-                    Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
-                    Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
+                                toast("Success")
+                                Log.d("TAG", "getJogging: Success Save gmbar")
+                            }
+                            .addOnFailureListener{
+                                Toast.makeText(activity?.applicationContext, "Error : ${it.toString().trim()}", Toast.LENGTH_SHORT)
+                            }
+                        Log.d("TAG", "addJogging: distance in meters " + jogging?.distanceInMeters)
+                        Log.d("TAG", "addJogging: calories burned" + jogging?.caloriesBurned)
+                        Log.d("TAG", "addJogging: ${document.id.toString().trim()}")
+                    }else {
+                        Log.d("TAG", "getJogging: Joggign is null")
+                    }
+                    Log.d("TAG", "addJogging: " + jogging?.id)
+                    Log.d("TAG", "addJogging: addJogging" + this.caloriesBurned)
                 }else {
-                    Log.d("TAG", "getJogging: Joggign is null")
+                    toast("Jogging di cancel")
                 }
-                Log.d("TAG", "addJogging: " + jogging?.id)
-                Log.d("TAG", "addJogging: addJogging" + this.caloriesBurned)
-            }else {
-                toast("Jogging di cancel")
             }
         }
     }

@@ -3,38 +3,28 @@ package com.example.dietjoggingapp.ui.Fragments
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
-import androidx.viewbinding.ViewBindings
 import com.example.dietjoggingapp.R
 import com.example.dietjoggingapp.database.User
-import com.example.dietjoggingapp.databinding.FragmentAccountDetailBinding
 import com.example.dietjoggingapp.databinding.FragmentEditBinding
 
-import com.example.dietjoggingapp.other.Constants
 import com.example.dietjoggingapp.other.registerUtils
 import com.example.dietjoggingapp.utility.toast
+import com.example.dietjoggingapp.utility.utils
 import com.github.dhaval2404.imagepicker.ImagePicker
-import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 // TODO: Rename parameter arguments, choose names that match
@@ -103,11 +93,12 @@ class EditFragment : Fragment() {
                     user = it.result.toObject(User::class.java)!!
                     binding.etEmail.setText(user.email)
                     binding.etName.setText(user.fullName)
-                    binding.etHeight.setText(user.height.toString())
+                    binding.etHeight.setText((user.height * 100).roundToInt().toString())
                     binding.etWeight.setText(user.weight.toString())
                     ageDay = user.birthDate
                     ageMonth = user.birthMonth
                     ageYear = user.birthYear
+                    binding.etBirthDate.setText("${ageYear}-${ageMonth}-${ageDay}")
                     if (user.gender == "male") {
                         binding.rbMale.isChecked = true
                     }else {
@@ -186,37 +177,46 @@ class EditFragment : Fragment() {
 
         if(binding.rbMale.isChecked) {
             gender = "male"
-        } else {
+        } else if(binding.rbFemale.isChecked){
             gender = "female"
         }
         val fullname = binding.etName.text.toString()
         val weight = binding.etWeight.text.toString().toFloat().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
-        val height = binding.etHeight.text.toString().toFloat().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
+        val height = binding.etHeight.text.toString().toFloat().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()/100
         val maxWeight: Float = maxWeight((binding.etHeight.text.toString().toFloat() / 100.00).toBigDecimal().setScale(2, RoundingMode.DOWN).toFloat())
         val ow: Float = ow(binding.etWeight.text.toString().toFloat(), binding.etHeight.text.toString().toFloat())
         age = registerUtils.ageInYear(ageYear, ageMonth, ageDay)
-        val bmr = dailyCalorie(binding.etWeight.text.toString().toFloat(), binding.etHeight.text.toString().toFloat(), age.toFloat())
+
         var updateUser: HashMap<String, Any> = HashMap()
         var user = User()
+
         user.fullName = binding.etName.text.toString()
         user.weight = binding.etWeight.text.toString().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
-        user.height = binding.etHeight.text.toString().toBigDecimal().setScale(2, RoundingMode.UP).toFloat()
+        user.height = height
+        user.bmi = utils.bmi(height, weight)
         user.age = age
+        val bmr = utils.bmr(gender, weight, height * 100, age, utils.bmi(height, weight))
         user.bmr = bmr
+        val dailyCalorie = utils.dailyCalorie(gender, weight, height * 100, age)
+        user.dailyCalorie = dailyCalorie
         user.maxWeight = maxWeight
         user.overweight = ow
         user.gender = gender
         user.birthDate = ageDay
         user.birthMonth = ageMonth
         user.birthYear = ageYear
+        user.maxCalPerServe = utils.maxCalPerServe(gender, weight, height * 100, age, user.bmi)
         updateUser.put("fullName", fullname)
         updateUser.put("weight", weight)
         updateUser.put("height", height)
         updateUser.put("age", age)
+        updateUser.put("bmi", user.bmi)
         updateUser.put("bmr", bmr)
+        updateUser.put("dailyCalorie", dailyCalorie)
         updateUser.put("maxWeight", maxWeight)
         updateUser.put("overweight", ow)
         Log.d("TAG", "save: ${gender}")
+        updateUser.put("maxCalPerServe", user.maxCalPerServe)
         updateUser.put("gender", gender)
         Log.d("TAG", "save: ${gender}")
         updateUser.put("birthDate", ageDay)

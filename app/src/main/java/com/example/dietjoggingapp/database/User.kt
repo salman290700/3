@@ -24,5 +24,6 @@ data class User(
     var gender: String = "",
     var birthDate: Int = 0,
     var birthMonth: Int = 0,
-    var birthYear: Int = 0
+    var birthYear: Int = 0,
+    var bmi: Float = 0.0f
 ): Parcelable

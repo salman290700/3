@@ -6,5 +6,5 @@ import com.example.dietjoggingapp.database.domains.ListFoodSuggest
 import com.example.dietjoggingapp.other.UiState
 
 interface FoodSuggestRepo {
-    fun getFoodSuggestion(context: Context, url: String, result: (UiState<List<FoodSuggest>>) -> Unit)
+    fun getFoodSuggestion(context: Context, url: String, maxCalPerServe: Float, bmi: Float? ,result: (UiState<List<FoodSuggest>>) -> Unit)
 }
