@@ -19,12 +19,12 @@ class utils {
                 return DT.roundToInt()
             }else if(bmi >= 25) {
                 if(calDefFood == 0.0f && CalDef == 0.0f) {
-                    var bmrPlus = 7700 / 4 /7
+                    var bmrPlus = 7700 / 4 / 7
                     DT = (ow * 7700) / bmrPlus
                     Log.d("TAG", "countDietDays: ${DT}")
                     return DT.roundToInt()
                 }else {
-                    var bmrPlus = 7700 / 4 /7
+                    var bmrPlus = 7700 / 4 / 7
                     DT = (ow * 7700) / (CalDef + bmrPlus)
                     Log.d("TAG", "countDietDays: ${DT}")
                     return DT.roundToInt()
@@ -32,11 +32,19 @@ class utils {
             }else {
                 if(calDefFood == 0.0f && CalDef == 0.0f) {
                     var bmrPlus = 7700 / 2 / 7
+                    var dietKg = minWeight - weight
+                    Log.d("TAG", "countDietDays: ${dietKg}")
+                    Log.d("TAG", "countDietDays: ${dietKg * 7700}")
+                    Log.d("TAG", "countDietDays: ${bmrPlus}")
                     DT = ((minWeight - weight) * 7700) / bmrPlus
                     Log.d("TAG", "countDietDays: ${DT}")
                     return DT.roundToInt()
                 }else {
-                    var bmrPlus = 7700 / 2 /7
+                    var bmrPlus = 7700 / 2 / 7
+                    var dietKg = minWeight - weight
+                    Log.d("TAG", "countDietDays: ${dietKg}")
+                    Log.d("TAG", "countDietDays: ${dietKg * 7700}")
+                    Log.d("TAG", "countDietDays: ${bmrPlus}")
                     DT = ((minWeight - weight)* 7700) / (CalDef + bmrPlus)
                     Log.d("TAG", "countDietDays: ${DT}")
                     return DT.roundToInt()
@@ -80,7 +88,7 @@ class utils {
         }
 
         fun minWeight(heightInM: Float): Float {
-            val minWeight = 18 * (heightInM * heightInM)
+            val minWeight = 18.5F * (heightInM * heightInM)
             Log.d("TAG", "minWeight: $minWeight")
             return minWeight
         }
@@ -103,7 +111,7 @@ class utils {
                     Log.d("TAG", "bmr: ${bmr}")
                     Log.d("TAG", "bmr: ${bmr} bmi ${bmi}")
                     return bmr
-                }else if (bmi >= 18 && bmr <= 25 ){
+                }else if (bmi >= 18.5 && bmr <= 25 ){
                     bmr = 66 + 13.7f * (weight) + 5.0f * (height) - 6.78f * age.toFloat()
                     Log.d("TAG", "bmr: ${bmr}")
                     Log.d("TAG", "bmr: ${bmr} bmi ${bmi}")
@@ -112,6 +120,7 @@ class utils {
                     bmr = 66 + 13.7f * (weight) + 5.0f * (height) - 6.78f * age.toFloat()
                     Log.d("TAG", "bmr: ${bmr}")
                     var dietKg = 7700 / (7 * 2)
+                    Log.d("TAG", "bmr: ${bmr}")
                     bmr = bmr + dietKg
                     Log.d("TAG", "bmr: ${bmr} bmi ${bmi}")
                     return bmr
@@ -125,14 +134,15 @@ class utils {
                     Log.d("TAG", "bmr: ${bmr}")
                     Log.d("TAG", "bmr: ${bmr} bmi ${bmi}")
                     return bmr
-                }else if (bmi >= 18  && bmr <= 25){
+                }else if (bmi >= 18.5  && bmr <= 25){
                     bmr = 66 + 13.7f * (weight) + 1.8f * (height) - 6.78f * age.toFloat()
                     Log.d("TAG", "bmr: ${bmr} bmi ${bmi}")
                     Log.d("TAG", "bmr: ${bmr}")
                     return bmr
                 } else {
-                    bmr = 66 + 13.7f * (weight) + 1.8f * (height) - 6.78f * age.toFloat()
                     var dietKg = 7700 / (7 * 2)
+                    bmr = 66 + 13.7f * (weight) + 1.8f * (height) - 6.78f * age.toFloat()
+                    Log.d("TAG", "bmr: ${bmr}")
                     bmr = bmr + dietKg
                     Log.d("TAG", "bmr: ${bmr} bmi ${bmi}")
                     Log.d("TAG", "bmr: ${bmr}")

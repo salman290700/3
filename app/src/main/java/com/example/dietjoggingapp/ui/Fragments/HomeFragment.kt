@@ -82,7 +82,7 @@ class HomeFragment : Fragment() {
                 user = it.result.toObject(User::class.java)!!
                 binding.tvOW.text = user?.overweight?.roundToInt().toString()
                 binding.tvbmr.text = user?.bmr.toString()
-                binding.tvWeight.text = user?.weight.toString().toFloat().roundToInt().toString()
+                binding.tvWeight.text = user?.weight.toString().toFloat().toBigDecimal().setScale(2).toString()
                 binding.tvAge.text = registerUtils.ageInYear(user.birthYear, user.birthMonth, user.birthDate).toString()
                 binding.tvTallincm.text = (user?.height!! * 100.0f).roundToInt().toString()
 

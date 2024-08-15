@@ -54,24 +54,25 @@ class FoodSuggestImpl: FoodSuggestRepo {
                         .addHeader("X-RapidAPI-Key", "af01d0da1cmshf3bec2d6210b1d8p1a6d54jsn7407d83c4f15")
                         .addHeader("X-RapidAPI-Host", "low-carb-recipes.p.rapidapi.com")
                         .build()
-                    if(bmi!! < 18.5F) {
-                        request = Request.Builder()
-                            .url("https://low-carb-recipes.p.rapidapi.com/search?tags=pork-free%3Blow-carb%3Bhigh-protein%3Bgluten-free&maxAddedSugar=0&maxNetCarbs=0&limit=20&maxCalories=${maxCalPerServe.roundToInt()}")
-                            .get()
-                            .addHeader("X-RapidAPI-Key", "af01d0da1cmshf3bec2d6210b1d8p1a6d54jsn7407d83c4f15")
-                            .addHeader("X-RapidAPI-Host", "low-carb-recipes.p.rapidapi.com")
-                            .build()
-                        Log.d("TAG", "getFoodSuggestion: ${request.url()}")
-                    }else {
-                        request = Request.Builder()
-                            .url("https://low-carb-recipes.p.rapidapi.com/search?tags=pork-free%3Blow-carb%3Bgluten-free&maxAddedSugar=0&maxNetCarbs=0&limit=20&maxCalories=${maxCalPerServe.roundToInt()}")
-                            .get()
-                            .addHeader("X-RapidAPI-Key", "af01d0da1cmshf3bec2d6210b1d8p1a6d54jsn7407d83c4f15")
-                            .addHeader("X-RapidAPI-Host", "low-carb-recipes.p.rapidapi.com")
-                            .build()
-                        Log.d("TAG", "getFoodSuggestion: ${request.url()}")
-                    }
+//                    if(bmi!! < 18.5F) {
+//                        request = Request.Builder()
+//                            .url("https://low-carb-recipes.p.rapidapi.com/search?tags=pork-free%3Blow-carb%3Bhigh-protein%3Bgluten-free&maxAddedSugar=0&maxNetCarbs=0&limit=20&maxCalories=${maxCalPerServe.roundToInt()}")
+//                            .get()
+//                            .addHeader("X-RapidAPI-Key", "af01d0da1cmshf3bec2d6210b1d8p1a6d54jsn7407d83c4f15")
+//                            .addHeader("X-RapidAPI-Host", "low-carb-recipes.p.rapidapi.com")
+//                            .build()
+//                        Log.d("TAG", "getFoodSuggestion: ${request.url()}")
+//                    }else {
+//                        request = Request.Builder()
+//                            .url("https://low-carb-recipes.p.rapidapi.com/search?tags=pork-free%3Blow-carb%3Bgluten-free&maxAddedSugar=0&maxNetCarbs=0&limit=20&maxCalories=${maxCalPerServe.roundToInt()}")
+//                            .get()
+//                            .addHeader("X-RapidAPI-Key", "af01d0da1cmshf3bec2d6210b1d8p1a6d54jsn7407d83c4f15")
+//                            .addHeader("X-RapidAPI-Host", "low-carb-recipes.p.rapidapi.com")
+//                            .build()
+//                        Log.d("TAG", "getFoodSuggestion: ${request.url()}")
+//                    }
                     Log.d("TAG", "getFoodSuggestion: ${request.url().toString().contains("gluten-free")}")
+                    Log.d("TAG", "getFoodSuggestion: ${request.url().toString()}")
                     val response = client.newCall(request).execute()
                     client.newCall(request).enqueue(object: Callback{
                         override fun onFailure(call: Call, e: IOException) {
@@ -86,9 +87,11 @@ class FoodSuggestImpl: FoodSuggestRepo {
                     if(jsonString.contains("message")){
                         var json: JSONObject = JSONObject(jsonString)
                         val message = json!!.get("message").toString()
+                        Log.d("TAG", "getFoodSuggestion message: $message")
                         result.invoke(UiState.failure(message))
-                    }else if (jsonString.contains("loc")){
-                        result.invoke(UiState.failure("Anda sudah tidak bisa makan lagi"))
+//                    }else if (jsonString.contains("loc")){
+//                        Log.d("TAG", "getFoodSuggestion loc: $jsonString")
+//                        result.invoke(UiState.failure("$jsonString"))
                     }else {
                     var jsonArray2 : JSONArray?= JSONArray(jsonString)
                         Log.d("TAG", "onResponse json array2: ${jsonArray2}")

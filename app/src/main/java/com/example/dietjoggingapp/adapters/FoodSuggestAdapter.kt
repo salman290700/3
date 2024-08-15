@@ -33,6 +33,7 @@ class FoodSuggestAdapter: RecyclerView.Adapter<FoodSuggestAdapter.FoodSuggestVie
         var titleText = binding.tvNamgeOfFood
         var descText = binding.tvDescription
         var image = binding.ivFoodSuggestImage
+        var tvKcal = binding.tvKcal
         override fun onClick(v: View?) {
             binding.root.setOnClickListener(this)
         }
@@ -70,6 +71,7 @@ class FoodSuggestAdapter: RecyclerView.Adapter<FoodSuggestAdapter.FoodSuggestVie
             .build()
         holder.titleText.text = listFoodSuggest.get(position).name
         holder.descText.text = listFoodSuggest.get(position).description
+        holder.tvKcal.text = "${listFoodSuggest.get(position).nutrients.caloriesKCal.toString()} kcal"
 //        englishIndonesianTranslator.downloadModelIfNeeded()
 //        if (!listFoodSuggest.isEmpty()) {
 //            englishIndonesianTranslator.translate(listFoodSuggest.get(position).name.toString())
